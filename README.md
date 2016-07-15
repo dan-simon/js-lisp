@@ -1,13 +1,13 @@
 This is a simple Lisp in JavaScript. It has:
 
-first-class macros
-first-class syntax (very slightly different from, but as powerful as, fexprs)
-first-class enviroments (as dictionaries/objects/hashes)
-prototype-based inheritance (used to implement scope)
+ first-class macros
+ first-class syntax (very slightly different from, but as powerful as, fexprs)
+ first-class enviroments (as dictionaries/objects/hashes)
+ prototype-based inheritance (used to implement scope)
 
-It is a Lisp-1. It mostly has the same features as other lisps, but there are some syntactic differences.
+ It is a Lisp-1. It mostly has the same features as other lisps, but there are some syntactic differences.
 
-It should work in es5 + maps, if you remove the main function and input/output stuff. But node is the intended environment.
+ It should work in es5 + maps, if you remove the main function and input/output stuff. But node is the intended environment.
 
 Why you shouldn't use it for anything important (at least as it is):
 
