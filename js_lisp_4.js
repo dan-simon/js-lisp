@@ -1143,17 +1143,18 @@ global_scope.hash.str = new IntFunction(function (args) {
     return new IntString(x.to_s());
 });
 
-var string_concat_join = function (values, s) {
+var string_concat_join = function (values, s, f_name) {
     return new IntString(values.list.map(function (x) {
         if (!(x.basic_type())) {
-            throw '~ can only be used to concatenate basic types.';
+            throw 'Only basic types can be concatenated as strings. (Found in '
+                + f_name + '.)';
         }
         return x.to_s_text();
     }).join(s.s));
 }
 
 global_scope.hash['~'] = new IntFunction(function (args) {
-    return string_concat_join(args, new IntString(''));
+    return string_concat_join(args, new IntString(''), '~');
 });
 
 var eq = new IntFunction(function (args) {
@@ -1475,7 +1476,7 @@ global_scope.hash.join = new IntFunction(function (args) {
     if (!y.basic_type) {
         throw 'The second argument of join must be a basic type.';
     }
-    return string_concat_join(x, new IntString(y.to_s_text()));
+    return string_concat_join(x, new IntString(y.to_s_text()), 'join');
 });
 
 global_scope.hash.reverse = new IntFunction(function (args, scope) {
@@ -1534,11 +1535,7 @@ global_scope.hash['str-code'] = new IntFunction(function (args) {
 });
 
 global_scope.hash.puts = new IntFunction(function (args) {
-    var x = check_one_arg(args, 'puts');
-    if (!(x.basic_type())) {
-        throw 'puts only takes basic types!';
-    }
-    var s = x.to_s_text();
+    var s = string_concat_join(args, new IntString(''), 'puts').s;
     console.log(s);
     return new List([]);
 });

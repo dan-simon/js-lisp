@@ -13,7 +13,7 @@ var regexify = function (x) {
 }
 
 var string_in_form = function (string) {
-    string = string.replace('\\', '\\\\');
+    string = string.replace(/\\/g, '\\\\');
     for (var i in escapes) {
         if (i !== '\\' && i !== '"') {
             string = string.replace(
