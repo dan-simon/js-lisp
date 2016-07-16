@@ -1,4 +1,4 @@
-This is a simple Lisp in JavaScript. It's only here because I wanted to have it out in the world if I ever completely stopped work on it; it's not intended for any type of use.
+This is a simple Lisp in JavaScript. It's only here because I wanted to have it out in the world if I ever completely stopped work on it (which I very likely have); it's not intended for any type of use, but I waive all rights to it.
 
 To use it, download the files in it and run the js_lisp_4 file with node. (Yes, versions 1, 2, and 3 existed in the past.)
 

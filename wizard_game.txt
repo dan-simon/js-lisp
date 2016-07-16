@@ -1,0 +1,229 @@
+(defm def-hash a (` (defq (, (car a)) (hash (@, (cdr a))))))
+
+(defq *objects* [\whisky-bottle \bucket \frog \chain \couch \torch \wizard \well])
+
+(def-hash *descriptions*
+    [\living-room (~ "You are in the living-room of a wizard's house. "
+                   "There is a wizard snoring loudly on the couch.")]
+    [\garden (~ "You are in a beautiful garden. "
+              "There is a well in front of you.")]
+    [\attic (~ "You are in the attic of the wizard's house. "
+            "There is a giant welding torch in the corner.")]
+    [\netherworld (~ "You are in a misty, foggy place.")])
+
+(def-hash *exits*
+      [\living-room (hash [\west [\door \garden]] [\upstairs [\stairway \attic]])]
+      [\garden (hash [\east [\door \living-room]])]
+      [\attic (hash [\downstairs [\stairway \living-room]])]
+      [\netherworld (hash)])
+
+(def-hash *object-locations*
+    [\whisky-bottle \living-room] [\wizard \living-room]
+    [\couch \living-room] [\bucket \living-room]
+    [\chain \garden] [\frog \garden]
+    [\torch \attic] [\well \garden])
+
+(def-hash *notable*
+    [\whisky-bottle t] [\wizard []] [\couch []] [\bucket t]
+    [\chain t] [\frog t] [\torch []] [\well []])
+
+(def-hash *take-able*
+    [\whisky-bottle t] [\wizard []] [\couch []] [\bucket t]
+    [\chain t] [\frog t] [\torch []] [\well []])
+
+(defq *location* \living-room)
+
+(defn describe-location (location) (get *descriptions* location))
+
+(defn describe-exit (direction info)
+    (~ 'There is a ' (car info) ' going ' direction ' from here.'))
+
+(defn exits-from (p) (get *exits* p))
+
+(defn unlines (l) (join l '\n'))
+
+(defn all (f data) (unlines (map f data)))
+
+(defq func-from fn-from)
+
+(defn describe-paths (location)
+    (all (apply describe-exit) (pairs (exits-from location))))
+
+(defn is-at (object location)
+    (= (get *object-locations* object) location))
+
+(defn notable? (x) (get *notable* x))
+
+(defn take-able? (x) (get *take-able* x))
+
+(defn is-here? (x) (is-at x *location*))
+
+(defn have? (x) (is-at x \body))
+
+(defn objects-here ()
+    (filter (fn (o) (and (is-here? o) (notable? o))) *objects*))
+
+(defn describe-object (object) (~ 'You see a ' object ' here.'))
+
+(defn describe-objects (location) (all describe-object (objects-here)))
+
+(defn non-empty? (x) (!= x ''))
+
+(defn join-no-breaks rest (join (filter non-empty? rest) '\n'))
+
+(defn look () (void
+    (puts (join-no-breaks
+        (describe-location *location*)
+        (describe-paths *location*)
+        (describe-objects *location*)))))
+
+(defn get-exit-in (direction)
+    (s (safe-get (exits-from *location*) direction))
+    (if s (car s) nil))
+
+(defn _go-to (loc) (set :*location* loc))
+
+(defq sym->str (syn-from ~))
+
+(defn sym->str-all (x) (map ~ x))
+
+(defn take-param-as-sym (f) (mac params
+    (` ((, (apply f)) (, (sym->str-all params))))))
+
+(defm def-take-param-as-sym (x y) [defq x [take-param-as-sym y]])
+
+(defm applyfn (x y) (apply ((func-from fn) x y)))
+
+(defm def-debug-m (a b c) [defm a b [do [print b] [print c] c]])
+
+(defm check (let-b (& p) q)
+     (` (let (@, let-b)
+          (cond (@, (map (applyfn (x y) [[:not x] [:puts y]]) p))
+                (t (puts (, q)))))))
+
+(defm def-check (a b (& c))
+    (` (def-take-param-as-sym (, a) (mac (, b) (check (@, c))))))
+
+(def-hash dir-hash
+    [\w \west] [\e \east] [\n \north] [\s \south] [\u \upstairs] [\d \downstairs])
+
+(defn norm-dir (direction) (get dir-hash (car direction)))
+
+(def-check walk (direction) (
+    (n-direction (norm-dir direction))
+    (exit (get-exit-in n-direction)))
+    (exit (~ 'You can\'t go ' direction ' from here.'))
+    (do
+        (_go-to (cadr exit))
+        (~ 'You are now in the ' (cadr exit) '.')))
+
+(def-hash disamb-hash [\bottle \whisky-bottle] [\whisky \whisky-bottle])
+
+(defn disamb (x) (if (has? disamb-hash x) (get disamb-hash x) x))
+
+(defn exists? (x) (has? *object-locations* x))
+
+(def-check take (o) ((o (disamb o)))
+    ((exists? o) "You can't see that here.")
+    ((not (have? o)) (~ "But you already have the " o "."))
+    ((is-here? o) "You can't see that here.")
+    ((take-able? o) "That's hardly portable.")
+    (do
+        (set *object-locations* o \body)
+        (~ "You are now carrying the " o ".")))
+
+(def-check drop (o) ((o (disamb o)))
+    ((exists? o) (~ "You don't have the " o "."))
+    ((have? o) (~ "You don't have the " o "."))
+    (do
+        (set *object-locations* o *location*)
+        (~ "You have dropped the " o ".")))
+
+(defq pickup take)
+
+(defq go walk)
+
+(defn you-have (object) (~ 'You have a ' object '.'))
+
+(defn inv () (s (all you-have (filter have? *objects*)))
+    (puts (if (= s '') 'You have nothing!' s)))
+
+(defq inventory inv)
+
+(defq *chain-welded* nil)
+
+(defq *bucket-full* nil)
+
+(defq *splashed-wizard* nil)
+
+(defm turn-on (x) (` (set (quote (, x)) t)))
+
+(defm turn-off (x) (` (set (quote (, x)) nil)))
+
+(defn dont-have (x) (~ "You don't have the " x "!"))
+
+(defm game-action (name subject object place needed (& rest)) (` (
+     def-check (, name) (subj obj) ()
+        ((= *location* (, place)) (~ "You can't " (quote (, name)) " here, in the "
+        *location* "!"))
+        ((= subj (, subject)) (~ "You can't " (quote (, name)) " the " subj "!"))
+        ((= obj (, object)) (~ "You can't " (quote (, name)) " the " obj "!"))
+        (@, (map (fn (x) [[:have? x] [:dont-have x]]) needed))
+        (@, rest)
+)))
+
+(game-action weld \chain \bucket \attic (\chain \bucket)
+    ((not *chain-welded*) "You already welded the chain to the bucket!")
+    (do
+        (turn-on *chain-welded*)
+        "The chain is now securely welded to the bucket."))
+
+(game-action dunk \bucket \well \garden (\bucket)
+    (*chain-welded* (~ "You try getting water, but the well is too deep. "
+    "You briefly consider dropping the bucket in the water, but decide not to "
+    "because you would have no way to get it back."))
+    ((not *bucket-full*) (~ "The bucket is already full. Why fill it again?"))
+    (do
+        (turn-on *bucket-full*)
+        (~ "Using the chain, you dunk the bucket in the well. Now it is full.")))
+
+(game-action splash \bucket \wizard \living-room (\bucket)
+    ((not *splashed-wizard*) (~ "You already splashed the wizard. "
+    "Better not push your luck."))
+    (*bucket-full* (~ "You have no water to splash the wizard with."))
+    (do
+        (turn-on *splashed-wizard*)
+        (if (have? \frog) (do
+            (_go-to \netherworld)
+            (~ "The wizard awakens to see that you are in possession\n"
+               "of his most precious - and dangerous! - frog. He\n"
+               "completely loses it. As he waves his wand at you,\n"
+               "everything disappears ..."))
+            (do (puts "The wizard awakens from his slumber, greets you\n"
+                 "warmly, and thanks you for pulling him out of a rather\n"
+                 "nasty dream. Your reward, it seems, is a magical\n"
+                 "low-carb donut which he hands you ... right before\n"
+                 "drifting off to sleep again.\n\nYou won!!") (exit))
+)))
+
+(defn letter? (char) (or (<= \a char \z) (= char \-)))
+
+(defn not-letter? (s) (not (letter? s)))
+
+(defn add-char (f r char) (if (f char) (push r []) (push (last r) char)))
+
+(defn join-all (l) (join l ''))
+
+(defn split-at (f s) (do
+    (def :r [[]])
+    (each (fn (char) (add-char f r char)) (chars s))
+    (set :r (map join-all (filter id r)))
+    r
+))
+
+(defn words (s) (split-at not-letter? s))
+
+(defn symbols (s) (map symbol (words s)))
+
+(defn main (s) ((fn (x) (if (car x) (nth 1 x) (puts 'Oops, something went wrong!')))
+    (catch (eval (symbols s)))))

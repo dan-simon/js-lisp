@@ -1,0 +1,189 @@
+(def :defq (macro (a b) (` (def (quote (, a)) (, b)))))
+
+(defq defm (macro (a b c) (` (defq (, a) (macro (, b) (, c))))))
+
+(defm defn (a b (& lets) c) (` (defq (, a) (fn (, b) (let (@, lets) (, c))))))
+
+(defn wrap-obj (obj) (syn (s) (get obj s)))
+
+(defn wrap-obj-from-fn (obj) (syn (s) ((fn-from (obj)) s)))
+
+(defm -> (x) (` (fn () (, x))))
+
+(defm ++ (x) (` (set (quote (, x)) (1+ (, x)))))
+
+(defn // (a b) (floor (/ a b)))
+
+(defm unless (c (& args)) (` (if (not (, c)) (@, args))))
+
+(defn puts~ args (puts ((apply ~) args)))
+
+(defn partition (l) (i 0) (a []) (do
+    (while (< i (len l)) (do
+        (push a [(nth i l) (nth (1+ i) l)])
+        (set :i (+ 2 i))
+    ))
+    a
+))
+
+(defn transform-kv-pair ((x y)) [list [quote x] y])
+
+(defn subtract-life (h x) (do
+    (defq new-life (- (h life) x))
+    (if (<= new-life 0)
+        (do
+            (puts~ (h name) " has died!")
+            ((h life=) 0)
+            ((h dead?=) t)
+            t
+        )
+        (do ((h life=) new-life) nil)
+    )
+))
+
+(defm defcreature (name (& props)) (` (def (quote (, name))
+    (let (h (hash
+        [\self (fn _ h)] [\name (quote (, name))] [\dead? nil]
+        (@, (map transform-kv-pair (partition props)))
+    )) (do
+        (each (fn (i) (def h (~ i \=) (fn (j) (set h i j)))) (keys h))
+        (wrap-obj h)
+    ))
+)))
+
+(defn hit (self damage) (do
+    (defq p-up (randint (self charisma)))
+    (if (= (% p-up 9) 7) (do
+        ((self life=) (+ (self life) (// p-up 4)))
+        (puts~ (self name) " magick powers up " p-up "!")
+    ))
+    (subtract-life self damage)
+))
+
+(defn make-attack (c self enemy) (do
+    (defq self-hit ((get attacks c) self enemy))
+    (if self-hit (do
+        (set :self-hit (randint (+ self-hit (self strength))))
+        (puts~ "You hit with " self-hit " points of damage!")
+        (defq killed? (hit enemy self-hit))
+        (unless killed? (do
+            (defq enemy-hit (randint (+ (enemy strength) (enemy weapon))))
+            (puts~ "Your enemy hit with " enemy-hit " points of damage!")
+            (hit self enemy-hit)
+        ))
+        killed?
+    ) nil)
+))
+
+(defq attacks (hash
+    [\% (fn (self _) (do
+        (defq lettuce (randint (self charisma)))
+        (puts~ "Healthy lettuce gives you " lettuce " life points!")
+        ((self life=) (+ (self life) lettuce))
+        0
+    ))]
+    [\^ (fn _ 13)]
+    [\* (fn (self _) (if
+        (= (self bombs) 0)
+        (do (puts "UHN!! You're out of bombs!!") nil)
+        (do ((self bombs=) (1- (self bombs))) 86)
+    ))]
+    [\/ (fn (_ enemy) (randint (+ 4 (** (% (enemy life) 10) 2))))]
+))
+
+(defn DwemthysArray creatures
+    (index 0)
+    (past-all-creatures? (-> (>= index (len creatures))))
+    (current-creature (-> (nth index creatures)))
+    (status (-> (cond
+        ((past-all-creatures?) \all-dead)
+        (((current-creature) dead?) \dead)
+        (t \live)
+    )))
+    (wrap-obj-from-fn (-> (do
+        (while (= (status) \dead) (++ index))
+        (if (past-all-creatures?) AllDead (current-creature))
+    )))
+)
+
+(defq AllDead (syn (x) (if (= x :dead?) t (throw 'This is a bug!'))))
+
+(defq *global* ((fn (x) (fn () x)) (current-scope)))
+
+(defn init () (eval (*global*) (quote (do
+    (each
+        (fn (x) (if (has? x) (del x)))
+        [\Rabbit \IndustrialRaverMonkey \DwarvenAngel
+        \AssistantViceTentacleAndOmbudsman \TeethDeer
+        \IntrepidDecomposedCyclist \Dragon \*enemy*
+        \*self*]
+    )
+    (defcreature Rabbit
+        life 10
+        strength 2
+        charisma 44
+        weapon 4
+        bombs 3
+    )
+    (defcreature IndustrialRaverMonkey
+        life 46
+        strength 35
+        charisma 91
+        weapon 2
+    )
+    (defcreature DwarvenAngel
+        life 540
+        strength 6
+        charisma 144
+        weapon 50
+    )
+    (defcreature AssistantViceTentacleAndOmbudsman
+        life 320
+        strength 6
+        charisma 144
+        weapon 50
+    )
+    (defcreature TeethDeer
+        life 655
+        strength 192
+        charisma 19
+        weapon 109
+    )
+    (defcreature IntrepidDecomposedCyclist
+        life 901
+        strength 560
+        charisma 422
+        weapon 105
+    )
+    (defcreature Dragon
+        life 1340
+        strength 451
+        charisma 1020
+        weapon 939
+    )
+    (defq *enemy* (DwemthysArray
+        IndustrialRaverMonkey
+        DwarvenAngel
+        AssistantViceTentacleAndOmbudsman
+        TeethDeer
+        IntrepidDecomposedCyclist
+        Dragon
+    ))
+    (defq *self* Rabbit)
+))))
+
+(init)
+
+(defn main (c) (killed? nil) (do
+    (set :killed? nil)
+    (cond
+        ((*self* dead?) (puts 'You are dead!'))
+        ((*enemy* dead?) (puts 'Quit flogging my dead monsters!'))
+        ((has? attacks c) (set :killed? (make-attack c *self* *enemy*)))
+        (t (puts~ "You can't do that. Use one of the attacks: " (join (keys attacks) ', ')))
+    )
+    (if killed? (if (*enemy* dead?)
+        (puts "Whoa. You decimated Dwemthy's Array.")
+        (puts~ "Get ready. " (*enemy* name) " has emerged.")
+    ))
+))
