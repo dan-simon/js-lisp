@@ -10,13 +10,9 @@
 
 (defm -> (x) (` (fn () (, x))))
 
-(defm ++ (x) (` (set (quote (, x)) (1+ (, x)))))
-
 (defn // (a b) (floor (/ a b)))
 
 (defm unless (c (& args)) (` (if (not (, c)) (@, args))))
-
-(defn puts~ args (puts ((apply ~) args)))
 
 (defn partition (l) (i 0) (a []) (do
     (while (< i (len l)) (do
@@ -32,7 +28,7 @@
     (defq new-life (- (h life) x))
     (if (<= new-life 0)
         (do
-            (puts~ (h name) " has died!")
+            (puts (h name) " has died!")
             ((h life=) 0)
             ((h dead?=) t)
             t
@@ -55,7 +51,7 @@
     (defq p-up (randint (self charisma)))
     (if (= (% p-up 9) 7) (do
         ((self life=) (+ (self life) (// p-up 4)))
-        (puts~ (self name) " magick powers up " p-up "!")
+        (puts (self name) " magick powers up " p-up "!")
     ))
     (subtract-life self damage)
 ))
@@ -64,11 +60,11 @@
     (defq self-hit ((get attacks c) self enemy))
     (if self-hit (do
         (set :self-hit (randint (+ self-hit (self strength))))
-        (puts~ "You hit with " self-hit " points of damage!")
+        (puts "You hit with " self-hit " points of damage!")
         (defq killed? (hit enemy self-hit))
         (unless killed? (do
             (defq enemy-hit (randint (+ (enemy strength) (enemy weapon))))
-            (puts~ "Your enemy hit with " enemy-hit " points of damage!")
+            (puts "Your enemy hit with " enemy-hit " points of damage!")
             (hit self enemy-hit)
         ))
         killed?
@@ -78,7 +74,7 @@
 (defq attacks (hash
     [\% (fn (self _) (do
         (defq lettuce (randint (self charisma)))
-        (puts~ "Healthy lettuce gives you " lettuce " life points!")
+        (puts "Healthy lettuce gives you " lettuce " life points!")
         ((self life=) (+ (self life) lettuce))
         0
     ))]
@@ -180,10 +176,10 @@
         ((*self* dead?) (puts 'You are dead!'))
         ((*enemy* dead?) (puts 'Quit flogging my dead monsters!'))
         ((has? attacks c) (set :killed? (make-attack c *self* *enemy*)))
-        (t (puts~ "You can't do that. Use one of the attacks: " (join (keys attacks) ', ')))
+        (t (puts "You can't do that. Use one of the attacks: " (join (keys attacks) ', ')))
     )
     (if killed? (if (*enemy* dead?)
         (puts "Whoa. You decimated Dwemthy's Array.")
-        (puts~ "Get ready. " (*enemy* name) " has emerged.")
+        (puts "Get ready. " (*enemy* name) " has emerged.")
     ))
 ))
