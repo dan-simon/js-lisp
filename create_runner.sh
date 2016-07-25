@@ -2,7 +2,7 @@
 
 # Create a runner for some js-lisp command argument.
 
-my_file="// runner for $1\n"
+my_file="// This file is a runner for $1.txt.\n"
 my_file+="var fs = require('fs');\n"
 my_file+="var jslisp = require('./js_lisp_4');\n"
 my_file+="var global_scope = jslisp.global_scope;\n"

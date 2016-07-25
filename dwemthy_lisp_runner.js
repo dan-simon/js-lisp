@@ -1,4 +1,4 @@
-// runner for dwemthy_lisp
+// This file is a runner for dwemthy_lisp.txt.
 var fs = require('fs');
 var jslisp = require('./js_lisp_4');
 var global_scope = jslisp.global_scope;
@@ -18,11 +18,13 @@ fs.readFile('dwemthy_lisp.txt', 'utf8', function (err, t) {
  throw 'no main function!';
  }
  var main_f = global_scope.get(m);
+ show_prompt();
  stdin.addListener('data', function (d) {
  try {
  d = d.toString();
  main_f.call(new jslisp.List([
  new jslisp.IntString(d.slice(0, -1))]));
+ show_prompt();
  } catch (e) {
  console.log('There was an exception:');
  console.log(e);

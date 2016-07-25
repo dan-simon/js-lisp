@@ -1,4 +1,4 @@
-// runner for wizard_game
+// This file is a runner for wizard_game.txt.
 var fs = require('fs');
 var jslisp = require('./js_lisp_4');
 var global_scope = jslisp.global_scope;
