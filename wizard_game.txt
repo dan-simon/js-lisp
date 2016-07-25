@@ -1,6 +1,8 @@
 (defm def-hash a (` (defq (, (car a)) (hash (@, (cdr a))))))
 
-(defq *objects* [\whisky-bottle \bucket \frog \chain \couch \torch \wizard \well])
+(defs qw x (map ~ x))
+
+(defq *objects* (qw whisky-bottle bucket frog chain couch torch wizard well))
 
 (def-hash *descriptions*
     [\living-room (~ "You are in the living-room of a wizard's house. "
@@ -12,9 +14,9 @@
     [\netherworld (~ "You are in a misty, foggy place.")])
 
 (def-hash *exits*
-      [\living-room (hash [\west [\door \garden]] [\upstairs [\stairway \attic]])]
-      [\garden (hash [\east [\door \living-room]])]
-      [\attic (hash [\downstairs [\stairway \living-room]])]
+      [\living-room (hash [\west (qw door garden)] [\upstairs (qw stairway attic)])]
+      [\garden (hash [\east (qw door living-room)])]
+      [\attic (hash [\downstairs (qw stairway living-room)])]
       [\netherworld (hash)])
 
 (def-hash *object-locations*

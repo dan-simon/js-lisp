@@ -1116,7 +1116,7 @@ global_scope.hash['syn'] = defining(Syntax, 'syn', 'syntax');
 
 global_scope.hash['defn'] = define_construct(IntFunction, 'defn', 'function');
 global_scope.hash['defm'] = define_construct(Macro, 'defm', 'macro');
-global_scope.hash['defs'] = define_construct(Macro, 'defs', 'syntax');
+global_scope.hash['defs'] = define_construct(Syntax, 'defs', 'syntax');
 
 global_scope.hash['fn-from'] = convert_to(IntFunction);
 global_scope.hash['mac-from'] = convert_to(Macro);

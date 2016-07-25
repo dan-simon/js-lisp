@@ -96,6 +96,8 @@
     )))
 )
 
+(defs qw x (map ~ x))
+
 (defq AllDead (syn (x) (if (= x :dead?) t (throw 'This is a bug!'))))
 
 (defq *global* ((fn (x) (fn () x)) (current-scope)))
@@ -103,10 +105,10 @@
 (defn init () (eval (*global*) (quote (do
     (each
         (fn (x) (if (has? x) (del x)))
-        [\Rabbit \IndustrialRaverMonkey \DwarvenAngel
-        \AssistantViceTentacleAndOmbudsman \TeethDeer
-        \IntrepidDecomposedCyclist \Dragon \*enemy*
-        \*self*]
+        (qw Rabbit IndustrialRaverMonkey DwarvenAngel
+        AssistantViceTentacleAndOmbudsman TeethDeer
+        IntrepidDecomposedCyclist Dragon *enemy*
+        *self*)
     )
     (defcreature Rabbit
         life 10
