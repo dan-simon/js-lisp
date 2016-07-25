@@ -225,5 +225,7 @@
 
 (defn symbols (s) (map symbol (words s)))
 
-(defn main (s) ((fn (x) (if (car x) (nth 1 x) (puts 'Oops, something went wrong!')))
+(defn error-message () (puts 'Oops! I didn\'t understand that!'))
+
+(defn main (s) ((fn (x) (if (car x) (nth 1 x) (error-message)))
     (catch (eval (symbols s)))))

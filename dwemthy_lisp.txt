@@ -1,9 +1,3 @@
-(def :defq (macro (a b) (` (def (quote (, a)) (, b)))))
-
-(defq defm (macro (a b c) (` (defq (, a) (macro (, b) (, c))))))
-
-(defm defn (a b (& lets) c) (` (defq (, a) (fn (, b) (let (@, lets) (, c))))))
-
 (defn wrap-obj (obj) (syn (s) (get obj s)))
 
 (defn wrap-obj-from-fn (obj) (syn (s) ((fn-from (obj)) s)))
