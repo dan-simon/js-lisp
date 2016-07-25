@@ -1,0 +1,25 @@
+(puts
+
+'Isn\'t free
+
+formatting fun?')
+(puts 'Spacing can be whatever you want and it still works.')
+
+(defn main
+
+
+_
+
+
+(do (puts 'Feels a
+
+little like
+
+perl poerty
+
+of some sort.')
+(puts 'Or just plain poetry.')
+(puts 'But I forgot that you can\'t see \
+the source.')
+
+))

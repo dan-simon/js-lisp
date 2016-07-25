@@ -1,10 +1,10 @@
-// This file is a runner for dwemthy_lisp.txt.
+// This file is a runner for spacing.txt.
 var fs = require('fs');
 var jslisp = require('./js_lisp_4');
 var global_scope = jslisp.global_scope;
 var show_prompt = function () {process.stdin.write('>>> ')}
 var stdin = process.openStdin();
-fs.readFile('dwemthy_lisp.txt', 'utf8', function (err, t) {
+fs.readFile('spacing.txt', 'utf8', function (err, t) {
  // We just wrap with do.
  t = '(do ' + t + ')';
  var pre_ast = jslisp.parse(jslisp.tokenize(t));

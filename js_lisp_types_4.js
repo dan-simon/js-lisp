@@ -15,7 +15,7 @@ var regexify = function (x) {
 var string_in_form = function (string) {
     string = string.replace(/\\/g, '\\\\');
     for (var i in escapes) {
-        if (i !== '\\' && i !== '"') {
+        if (i !== '\\' && i !== '"' && i !== '\n') {
             string = string.replace(
                 new RegExp(regexify(escapes[i]), 'g'), '\\' + i);
         }
@@ -23,7 +23,7 @@ var string_in_form = function (string) {
     return '\'' + string + '\'';
 }
 
-var escapes = {'n': '\n', '\\': '\\', '\'': '\'', '"': '"', 't': '\t'};
+var escapes = {'n': '\n', '\\': '\\', '\'': '\'', '"': '"', 't': '\t', '\n': ''};
 
 var TType = function () {}
 

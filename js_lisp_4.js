@@ -81,7 +81,7 @@ var find_quotes = function (s) {
         }
     }
     if (mode !== '') {
-        throw 'Improperly escaped or ended string.'
+        throw 'Improperly escaped or ended string.';
     }
     return {'string': result.join(''), 'dict': d};
 }

@@ -5,14 +5,11 @@ var global_scope = jslisp.global_scope;
 var show_prompt = function () {process.stdin.write('>>> ')}
 var stdin = process.openStdin();
 fs.readFile('wizard_game.txt', 'utf8', function (err, t) {
- var parts = t.split('\n\n');
- var pre_ast;
- var ast;
- for (var i = 0; i < parts.length; i++) {
- var pre_ast = jslisp.parse(jslisp.tokenize(parts[i]));
+ // We just wrap with do.
+ t = '(do ' + t + ')';
+ var pre_ast = jslisp.parse(jslisp.tokenize(t));
  var ast = jslisp.transform_list(pre_ast);
  global_scope.eval(ast);
- };
  var m = new jslisp.IntString('main');
  if (!(global_scope['has?'](m))) {
  throw 'no main function!';
