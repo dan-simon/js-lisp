@@ -1,0 +1,16 @@
+(defn plural (n thing) (~ n ' ' thing (if (= n 1) '' \s)))
+
+(defn verse (n) (do
+    (puts (plural (1+ n) \bottle) ' of beer on the wall.')
+    (puts (plural (1+ n) \bottle) ' of beer.')
+    (puts 'Take one down, pass it around.')
+    (puts (plural n \bottle) ' of beer on the wall.')
+))
+
+(defq bottle-count 98)
+
+(while (< -1 bottle-count) (do
+    (verse bottle-count)
+    (if (< 0 bottle-count) (puts ''))
+    (-- bottle-count)
+))

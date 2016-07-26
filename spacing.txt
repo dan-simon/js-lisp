@@ -5,6 +5,10 @@
 formatting fun?')
 (puts 'Spacing can be whatever you want and it still works.')
 
+
+(defn prompt ()
+'Enter some text (whatever you want): ')
+
 (defn main
 
 

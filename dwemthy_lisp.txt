@@ -6,8 +6,6 @@
 
 (defn // (a b) (floor (/ a b)))
 
-(defm unless (c (& args)) (` (if (not (, c)) (@, args))))
-
 (defn partition (l) (i 0) (a []) (do
     (while (< i (len l)) (do
         (push a [(nth i l) (nth (1+ i) l)])
@@ -165,6 +163,8 @@
 ))))
 
 (init)
+
+(defn prompt () '>>> ')
 
 (defn main (c) (killed? nil) (do
     (set :killed? nil)

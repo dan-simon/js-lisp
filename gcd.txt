@@ -1,0 +1,30 @@
+(defn gcd (a b) (cond
+    ((< b a) (gcd b a))
+    ((= a 0) b)
+    (t (gcd (% b a) a))
+))
+
+(defq asked 0)
+
+(defq total-prompts 2)
+
+(defq replies [])
+
+(defq prompts ['Enter one integer: ' 'Enter the other integer: ' ''])
+
+(defn formula () (~
+    "Greatest common denominator: "
+    (gcd (number (car replies)) (number (sec replies)))
+))
+
+(defn prompt () (nth asked prompts))
+
+(defn main (s) (do
+    (push replies s)
+    (++ asked)
+    (if (= asked total-prompts) (do
+        (defq c (catch (puts (formula))))
+        (if (not (car c)) (puts 'Oops! ' (sec c)))
+        (exit)
+    ))
+))

@@ -1,0 +1,8 @@
+(defq n 1)
+
+(while (<= n 100) (do (puts (cond
+    ((= (% n 15) 0) \FizzBuzz)
+    ((= (% n 3) 0) \Fizz)
+    ((= (% n 5) 0) \Buzz)
+    (t n)
+)) (++ n)))

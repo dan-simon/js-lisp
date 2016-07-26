@@ -1,4 +1,4 @@
-// This file is a runner for spacing.txt.
+// This file is an interactive runner for spacing.txt.
 var fs = require('fs');
 var jslisp = require('./js_lisp_4');
 var global_scope = jslisp.global_scope;
@@ -11,10 +11,21 @@ fs.readFile('spacing.txt', 'utf8', function (err, t) {
  var ast = jslisp.transform_list(pre_ast);
  global_scope.eval(ast);
  var m = new jslisp.IntString('main');
- if (!(global_scope['has?'](m))) {
- throw 'no main function!';
- }
+ var p = new jslisp.IntString('prompt');
  var main_f = global_scope.get(m);
+ var get_prompt = global_scope.get(p);
+ var show_prompt = function () {
+ try {
+ var p_val = get_prompt.call(new jslisp.List([]));
+ if (!(p_val instanceof jslisp.IntString)) {
+ throw '(prompt) must be a string.'
+ }
+ process.stdin.write(p_val.s);
+ } catch (e) {
+ console.log('There was an exception:');
+ console.log(e);
+ }
+ }
  show_prompt();
  stdin.addListener('data', function (d) {
  try {

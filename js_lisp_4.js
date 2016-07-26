@@ -494,6 +494,18 @@ var hash_method = function (method_name, num_args) {
     });
 }
 
+var g_sec = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'sec');
+    if (!(x instanceof List || x instanceof IntString)) {
+        throw 'Only lists and strings have a second item!';
+    }
+    if (x.len() < 2) {
+        throw 'Only lists and strings with at least ' +
+        'two items have a second item!';
+    }
+    return x.at(1);
+});
+
 var g_last = new IntFunction(function (args) {
     var x = check_one_arg(args, 'last');
     if (!(x instanceof List || x instanceof IntString)) {
@@ -560,6 +572,19 @@ var g_if = new Syntax(function (args, scope) {
     }
 });
 
+var g_unless = new Syntax(function (args, scope) {
+    if (args.len() !== 3 && args.len() !== 2) {
+        throw 'unless takes three (or two) arguments.';
+    }
+    if (!(js_to_bool(scope.eval(args.car())))) {
+        return scope.eval(args.at(1));
+    } else if (args.len() === 3) {
+        return scope.eval(args.at(2));
+    } else {
+        return new List([]);
+    }
+});
+
 var g_while = new Syntax(function (args, scope) {
     if (args.len() !== 2) {
         throw 'while takes two arguments.';
@@ -567,6 +592,18 @@ var g_while = new Syntax(function (args, scope) {
     var x = args.car();
     var y = args.at(1);
     while (js_to_bool(scope.eval(x))) {
+        scope.eval(y);
+    }
+    return new List([]);
+});
+
+var g_until = new Syntax(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'until takes two arguments.';
+    }
+    var x = args.car();
+    var y = args.at(1);
+    while (!(js_to_bool(scope.eval(x)))) {
         scope.eval(y);
     }
     return new List([]);
@@ -966,12 +1003,12 @@ var concat_lists = new IntFunction(function (args, scope) {
 
 var elem = new IntFunction(function (args, scope) {
     if (args.len() !== 2) {
-        throw 'elem takes two arguments!'
+        throw 'elem? takes two arguments!'
     }
     var item = args.car();
     var my_list = args.at(1);
     if (!(my_list instanceof List)) {
-        throw 'The second argument to elem must be a list!';
+        throw 'The second argument to elem? must be a list!';
     }
     for (var i = 0; i < my_list.len(); i++) {
         if (item.eq(my_list.at(i))) {
@@ -1039,11 +1076,12 @@ var cons = new IntFunction(function (args) {
 });
 
 global_scope.hash.cons = cons;
-global_scope.hash.elem = elem;
+global_scope.hash['elem?'] = elem;
 global_scope.hash.nth = nth;
 global_scope.hash['set-nth'] = set_nth;
 global_scope.hash.last = g_last;
 global_scope.hash.butlast = butlast;
+global_scope.hash.sec = g_sec;
 global_scope.hash['let'] = g_let;
 global_scope.hash['len'] = g_len;
 
@@ -1059,7 +1097,9 @@ global_scope.hash['list?'] = new IntFunction(function (args) {
 
 global_scope.hash.cond = cond;
 global_scope.hash['if'] = g_if;
+global_scope.hash['unless'] = g_unless;
 global_scope.hash['while'] = g_while;
+global_scope.hash['until'] = g_until;
 global_scope.hash['repeat'] = repeat;
 
 global_scope.hash['callable?'] = new IntFunction (function (args) {

@@ -223,6 +223,8 @@
     r
 ))
 
+(defn prompt () '>>> ')
+
 (defn words (s) (split-at not-letter? s))
 
 (defn symbols (s) (map symbol (words s)))
