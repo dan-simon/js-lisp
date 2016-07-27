@@ -957,6 +957,36 @@ global_scope.hash.zip = new IntFunction(function (args) {
     return new List(r);
 });
 
+global_scope.hash['car-cdr?'] = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'car-cdr?');
+    if (x instanceof IntFunction) {
+        return int_bool_from(x.basic_type());
+    }
+    if (!(x.basic_type())) {
+        return new List([]);
+    }
+    return int_bool_from(x.to_s_text().match(/^c[ad]*r$/));
+});
+
+global_scope.hash['car-cdr'] = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'car-cdr?');
+    if (x instanceof IntFunction) {
+        if (!x.basic_type()) {
+            throw 'Functions that are not already like car and cdr ' +
+            'cannot be converted.';
+        }
+        return x;
+    }
+    if (!(x.basic_type())) {
+        throw 'Non-basic values cannot be converted to values like car and cdr.';
+    }
+    var s = x.to_s_text();
+    if (!s.match(/^c[ad]*r$/)) {
+        throw 'Even basic values that do not look like car and cdr cannot be converted.';
+    }
+    return car_cdr(s.slice(1, -1));
+});
+
 global_scope.hash['number?'] = new IntFunction(function (args) {
     var x = check_one_arg(args, 'number?');
     if (x instanceof IntNumber) {
