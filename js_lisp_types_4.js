@@ -138,6 +138,10 @@ IntString.prototype.cdr = function () {
     return new IntString(this.s.slice(1));
 }
 
+IntString.prototype.slice = function (start, end) {
+    return new IntString(this.s.slice(start, end));
+}
+
 IntString.prototype.eq = function (y) {
     if (!(y instanceof IntString)) {
         return false;
@@ -371,6 +375,10 @@ List.prototype.cdr = function () {
 
 List.prototype.cons = function (x) {
     return new List([x].concat(this.list));
+}
+
+List.prototype.slice = function (start, end) {
+    return new List(this.list.slice(start, end));
 }
 
 List.prototype.each = function (f, scope) {

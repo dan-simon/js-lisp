@@ -1010,7 +1010,8 @@ var elem = new IntFunction(function (args, scope) {
     if (!(my_list instanceof List)) {
         throw 'The second argument to elem? must be a list!';
     }
-    for (var i = 0; i < my_list.len(); i++) {
+    var l = my_list.len();
+    for (var i = 0; i < l; i++) {
         if (item.eq(my_list.at(i))) {
             return new TType();
         }
@@ -1018,17 +1019,32 @@ var elem = new IntFunction(function (args, scope) {
     return new List([]);
 });
 
+var substring = new IntFunction(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'substring? takes two arguments!'
+    }
+    var sub = args.car();
+    var whole = args.at(1);
+    if (!(sub instanceof IntString)) {
+        throw 'The first argument to substring? must be a string!';
+    }
+    if (!(whole instanceof IntString)) {
+        throw 'The second argument to substring? must be a string!';
+    }
+    return int_bool_from(whole.s.indexOf(sub.s) !== -1);
+});
+
 var nth = new IntFunction(function (args, scope) {
     if (args.len() !== 2) {
         throw 'nth takes two arguments!'
     }
-    var pos = args.car();
-    var my_list = args.at(1);
-    if (!(pos instanceof IntNumber)) {
-        throw 'The first argument to nth must be a number!';
-    }
+    var my_list = args.car();
+    var pos = args.at(1);
     if (!(my_list instanceof List || my_list instanceof IntString)) {
-        throw 'The second argument to nth must be a list or string!';
+        throw 'The first argument to nth must be a list or string!';
+    }
+    if (!(pos instanceof IntNumber)) {
+        throw 'The second argument to nth must be a number!';
     }
     return my_list.at(pos.n)
 });
@@ -1037,18 +1053,115 @@ var set_nth = new IntFunction(function (args, scope) {
     if (args.len() !== 3) {
         throw 'set-nth takes three arguments!'
     }
-    var pos = args.car();
-    var my_list = args.at(1);
-    var new_v = args.at(2);
-    if (!(pos instanceof IntNumber)) {
-        throw 'The first argument to nth must be a number!';
-    }
+    var my_list = args.car();
+    var pos = args.at(1);
+    var value = args.at(2);
     if (!(my_list instanceof List)) {
-        throw 'The second argument to nth must be a list!';
+        throw 'The first argument to set-nth must be a list!';
     }
-    if (pos.n < 0 || pos.n > my_list.len - 1 ||
+    if (!(pos instanceof IntNumber)) {
+        throw 'The second argument to set-nth must be a number!';
+    }
+    var pos_n = pos.n;
+    if (pos_n < 0 || pos_n > my_list.len() - 1 ||
+        Math.floor(pos_n) !== pos_n) {
+        throw 'The index in set-nth must be in range and an integer!';
+    }
+    my_list.list[pos_n] = value;
+    return value;
+});
+
+var take = new IntFunction(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'take takes two arguments!'
+    }
+    var my_list = args.car();
+    var pos = args.at(1);
+    if (!(my_list instanceof List || my_list instanceof IntString)) {
+        throw 'The first argument to take must be a list or string!';
+    }
+    if (!(pos instanceof IntNumber)) {
+        throw 'The second argument to take must be a number!';
+    }
+    var pos_n = pos.n;
+    if (pos_n < 0 || pos_n > my_list.len() ||
+        Math.floor(pos_n) !== pos_n) {
+        throw 'The index in take must be in range and an integer!';
+    }
+    return my_list.slice(0, pos_n);
+});
+
+var drop = new IntFunction(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'drop takes two arguments!'
+    }
+    var my_list = args.car();
+    var pos = args.at(1);
+    if (!(my_list instanceof List || my_list instanceof IntString)) {
+        throw 'The first argument to drop must be a list or string!';
+    }
+    if (!(pos instanceof IntNumber)) {
+        throw 'The second argument to drop must be a number!';
+    }
+    var pos_n = pos.n;
+    if (pos_n < 0 || pos_n > my_list.len() ||
+        Math.floor(pos_n) !== pos_n) {
+        throw 'The index in drop must be in range and an integer!';
+    }
+    return my_list.slice(pos_n);
+});
+
+var slice = new IntFunction(function (args, scope) {
+    if (args.len() !== 3) {
+        throw 'slice takes three arguments!'
+    }
+    var my_list = args.car();
+    var start_pos = args.at(1);
+    var end_pos = args.at(2);
+    if (!(my_list instanceof List || my_list instanceof IntString)) {
+        throw 'The first argument to slice must be a list or string!';
+    }
+    if (!(start_pos instanceof IntNumber)) {
+        throw 'The second argument to slice must be a number!';
+    }
+    if (!(end_pos instanceof IntNumber)) {
+        throw 'The third argument to slice must be a number!';
+    }
+    var start_pos_n = start_pos.n;
+    var end_pos_n = end_pos.n;
+    if (start_pos_n < 0 || start_pos_n > my_list.len() ||
+        Math.floor(start_pos_n) !== start_pos_n) {
+        throw 'The first (starting) index in slice must be ' +
+        'in range and an integer!';
+    }
+    if (end_pos_n < 0 || end_pos_n > my_list.len() ||
+        Math.floor(end_pos_n) !== end_pos_n) {
+        throw 'The second (ending) index in slice must be ' +
+        'in range and an integer!';
+    }
+    if (start_pos_n > end_pos_n) {
+        throw 'The starting index in slice must be ' + 
+        'no greater than the ending index!';
+    }
+    return my_list.slice(start_pos_n, end_pos_n);
+});
+
+var set_nth = new IntFunction(function (args, scope) {
+    if (args.len() !== 3) {
+        throw 'set-nth takes three arguments!'
+    }
+    var my_list = args.car();
+    var pos = args.at(1);
+    var new_v = args.at(2);
+    if (!(my_list instanceof List)) {
+        throw 'The first argument to nth must be a list!';
+    }
+    if (!(pos instanceof IntNumber)) {
+        throw 'The second argument to nth must be a number!';
+    }
+    if (pos.n < 0 || pos.n > my_list.len() - 1 ||
         Math.floor(pos.n) !== pos.n) {
-        throw 'The index in set-nth must be in range!';
+        throw 'The index in set-nth must be in range and an integer!';
     }
     my_list.list[pos.n] = new_v;
     return new_v;
@@ -1077,8 +1190,12 @@ var cons = new IntFunction(function (args) {
 
 global_scope.hash.cons = cons;
 global_scope.hash['elem?'] = elem;
+global_scope.hash['substring?'] = substring;
 global_scope.hash.nth = nth;
 global_scope.hash['set-nth'] = set_nth;
+global_scope.hash.take = take;
+global_scope.hash.drop = drop;
+global_scope.hash.slice = slice;
 global_scope.hash.last = g_last;
 global_scope.hash.butlast = butlast;
 global_scope.hash.sec = g_sec;
