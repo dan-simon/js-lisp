@@ -125,7 +125,7 @@
 
 (defn exists? (x) (has? *object-locations* x))
 
-(def-check take (o) ((o (disamb o)))
+(def-check grab (o) ((o (disamb o)))
     ((exists? o) "You can't see that here.")
     ((not (have? o)) (~ "But you already have the " o "."))
     ((is-here? o) "You can't see that here.")
@@ -134,14 +134,14 @@
         (set *object-locations* o \body)
         (~ "You are now carrying the " o ".")))
 
-(def-check drop (o) ((o (disamb o)))
+(def-check let-go (o) ((o (disamb o)))
     ((exists? o) (~ "You don't have the " o "."))
     ((have? o) (~ "You don't have the " o "."))
     (do
         (set *object-locations* o *location*)
         (~ "You have dropped the " o ".")))
 
-(defq pickup take)
+(defq pickup grab)
 
 (defq go walk)
 
@@ -229,7 +229,23 @@
 
 (defn symbols (s) (map symbol (words s)))
 
+(defn magic-word () (puts
+    'You feel magic in the air, '
+    'but nothing actually happens.'
+))
+
+(def-hash *replacements*
+    [:take :grab]
+    [:xyzzy :magic-word]
+    [:plugh :magic-word]
+    [:drop :let-go]
+)
+
+(defn do-replacements (x) (map (fn (y)
+    (if (has? *replacements* y) (get *replacements* y) y)
+) x))
+
 (defn error-message () (puts 'Oops! I didn\'t understand that!'))
 
 (defn main (s) ((fn (x) (if (car x) (sec x) (error-message)))
-    (catch (eval (symbols s)))))
+    (catch (eval (do-replacements (symbols s))))))
