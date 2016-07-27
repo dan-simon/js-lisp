@@ -340,7 +340,10 @@ var ceil = new IntFunction(function (args) {
     return new IntNumber(Math.ceil(x.n));
 });
 
-var exit = new IntFunction(function () {
+var exit = new IntFunction(function (args) {
+    if (args.len() !== 0) {
+        throw 'exit takes no arguments!';
+    }
     process.exit();
 })
 
