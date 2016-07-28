@@ -636,12 +636,6 @@ var global_throw = new IntFunction(function (args) {
     throw x.s;
 });
 
-// To be reformed.
-var g_eval = new IntFunction(function (args, scope) {
-    var x = check_one_arg(args, 'eval');
-    return eval_tree(x, scope);
-});
-
 var pass_scope = new IntFunction(function (args, lexical) {
     var f = check_one_arg(args, 'pass-scope');
     if (!f.callable()) {
@@ -907,7 +901,6 @@ global_scope.hash.nil = global_nil;
 global_scope.hash.hash = make_hash;
 global_scope.hash.type = global_get_type;
 global_scope.hash['type-from'] = type_from;
-global_scope.hash['eval'] = g_eval;
 global_scope.hash['pass-eval'] = pass_eval;
 global_scope.hash['pass-scope'] = pass_scope;
 global_scope.hash['throw'] = global_throw;

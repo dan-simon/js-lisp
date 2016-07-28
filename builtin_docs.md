@@ -23,4 +23,7 @@ This describes the behavior of builtins. Note that all examples assume nothing h
 * quote takes an argument and returns that argument unevaluated. (quote a) is :a. (quote (1 2 3)) is [1 2 3]. (quote [1 2 3]) is [:list 1 2 3]. A single quote is used for strings and in no way is related to quote.
 * list returns a list of its arguments. (list 1) is [1]. (list 1 2 3) is [1 2 3]. (list [1 2 3]) is [[1 2 3]]. Note that square brackets are equivalent to list.
 * exit takes no arguments and exits. If you want to remove this (perhaps you are writing a program that calls random functions and don't want it to be able to end itself) you can use (del :exit). Note that this will not get rid of any copies of exit.
+* t is a singleton value of type t. It represents true. It is the value returned by boolean operations when a truthy value is needed (even though every value but the empty list is truthy.)
+  * It is not a constant, and it can be redefined without breaking the internal system, although the value true will still print as t.
+  * There are no variables named true and false, just t and nil, neither of which is a constant. nil is [], the empty list.
 * More to come...
