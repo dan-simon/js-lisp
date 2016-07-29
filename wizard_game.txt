@@ -33,6 +33,9 @@
     [\whisky-bottle t] [\wizard []] [\couch []] [\bucket t]
     [\chain t] [\frog t] [\torch []] [\well []])
 
+(def-hash descriptions
+    [\test 'This is a test description.'])
+
 (defq *location* \living-room)
 
 (defn describe-location (location) (get *descriptions* location))

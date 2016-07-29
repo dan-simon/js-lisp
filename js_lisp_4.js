@@ -1172,27 +1172,6 @@ var slice = new IntFunction(function (args, scope) {
     return my_list.slice(start_pos_n, end_pos_n);
 });
 
-var set_nth = new IntFunction(function (args, scope) {
-    if (args.len() !== 3) {
-        throw 'set-nth takes three arguments!'
-    }
-    var my_list = args.car();
-    var pos = args.at(1);
-    var new_v = args.at(2);
-    if (!(my_list instanceof List)) {
-        throw 'The first argument to nth must be a list!';
-    }
-    if (!(pos instanceof IntNumber)) {
-        throw 'The second argument to nth must be a number!';
-    }
-    if (pos.n < 0 || pos.n > my_list.len() - 1 ||
-        Math.floor(pos.n) !== pos.n) {
-        throw 'The index in set-nth must be in range and an integer!';
-    }
-    my_list.list[pos.n] = new_v;
-    return new_v;
-});
-
 var g_len = new IntFunction(function (args) {
     var x = check_one_arg(args, 'len');
     if (!(x instanceof List || x instanceof IntString
@@ -1660,6 +1639,28 @@ global_scope.hash.join = new IntFunction(function (args) {
         throw 'The second argument of join must be a basic type.';
     }
     return string_concat_join(x, new IntString(y.to_s_text()), 'join');
+});
+
+global_scope.hash.range = new IntFunction(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'range takes two arguments!';
+    }
+    var x = args.car();
+    var y = args.at(1);
+    if (!(x instanceof IntNumber)) {
+        throw 'The first argument of range must be a number.';
+    }
+    if (!(y instanceof IntNumber)) {
+        throw 'The second argument of range must be a number.';
+    }
+    var x_n = x.n;
+    var y_n = y.n;
+    var l = [];
+    while (x_n < y_n) {
+        l.push(new IntNumber(x_n));
+        x_n++;
+    }
+    return new List(l);
 });
 
 global_scope.hash.reverse = new IntFunction(function (args, scope) {

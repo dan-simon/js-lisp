@@ -1,0 +1,33 @@
+(defq hash-type (type-from \hash))
+
+(defn hash? (x) (= (type x) hash-type))
+
+(defm define-struct (a b) (` (do
+    (defn (, (~ \make- a)) params
+        (h ((apply hash) (zip (quote (, b)) params)))
+        (do (def h \__type (, (~ a))) h)
+    )
+    (defn (, (~ a \?)) (c) (and (hash? c) (= (get c \__type) (, (~ a)))))
+    (@, ((apply concat) (map (fn (i) (` (do
+        (defn (, (~ \get- i)) (x) (get x (, (~ i))))
+        (defn (, (~ \set- i)) (x y) (set x (, (~ i)) y))
+    ))) b)))
+)))
+
+(define-struct coord (x y))
+
+(defq c (make-coord 2 3))
+
+(print (coord? c))
+
+(print (coord? 3))
+
+(print (get-x c))
+
+(print (get-y c))
+
+(set-x c 5)
+
+(print (get-y c))
+
+(print (get-x c))

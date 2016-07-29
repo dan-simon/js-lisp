@@ -726,6 +726,9 @@ Hash.prototype['bind-all'] = function (x, y) {
             }
             rest_loc = i;
         }
+        if (x_i instanceof IntSymbol && x_i.name === '&') {
+            throw 'Very likely mistake: parameter found literally named &.';
+        }
     }
     if (rest_loc === -1) {
         if (l !== y_l) {
