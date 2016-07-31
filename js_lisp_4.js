@@ -1007,12 +1007,12 @@ global_scope.hash.symbol = new IntFunction(function (args) {
 
 global_scope.hash.choice = new IntFunction(function (args) {
     var x = check_one_arg(args, 'choice');
-    if (!(x instanceof List)) {
-        throw 'Only lists can be chosen from.';
+    if (!(x instanceof List || x instanceof IntString)) {
+        throw 'Only lists and strings can be chosen from.';
     }
     var l = x.len();
     if (l === 0) {
-        throw 'An empty list cannot be chosen from.';
+        throw 'An empty list or string cannot be chosen from.';
     }
     return x.at(Math.floor(Math.random() * l));
 });
@@ -1624,6 +1624,24 @@ global_scope.hash.filter = new IntFunction(function (args, scope) {
         throw 'filter\'s second argument must be a list.';
     }
     return y.filter(args.car(), scope);
+});
+
+global_scope.hash.split = new IntFunction(function (args) {
+    if (args.len() !== 2) {
+        throw 'split takes exactly two arguments!';
+    }
+    var x = args.car();
+    var y = args.at(1);
+    if (!x.basic_type) {
+        throw 'The first argument of split must be a basic type.';
+    }
+    if (!y.basic_type) {
+        throw 'The second argument of split must be a basic type.';
+    }
+    var parts = x.to_s_text().split(y.to_s_text());
+    return new List(parts.map(function (x) {
+        return new IntString(x);
+    }));
 });
 
 global_scope.hash.join = new IntFunction(function (args) {
