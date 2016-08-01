@@ -455,10 +455,12 @@ List.prototype.eq = function (y)  {
     if (!(y instanceof List)) {
         return false;
     }
-    if (this.list.length !== y.list.length) {
+    var t_l = this.list.length;
+    if (t_l !== y.list.length) {
         return false;
     }
-    for (var i = 0; i < this.list.length; i++) {
+
+    for (var i = 0; i < t_l; i++) {
         if (!(this.at(i).eq(y.at(i)))) {
             return false;
         }
@@ -543,7 +545,8 @@ Hash.prototype.extend = function (x) {
         ' by ' + x.to_s() + ' since it is not a hash.';
     }
     var keys = x.keys().list;
-    for (var i = 0; i < keys.length; i++) {
+    var keys_l = keys.length;
+    for (var i = 0; i < keys_l; i++) {
         this.def(keys[i], x.get(keys[i]));
     }
     return x;

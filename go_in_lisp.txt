@@ -1,0 +1,55 @@
+(defn surround-join (a b) (~ b (join a b) b))
+
+(defn display (board)
+    (l (len board))
+    (dashes (surround-join (repeat l \-) \+))
+    (join [dashes (surround-join board \|) dashes] '\n')
+)
+
+(defn empty-board (n) (repeat n ' '))
+
+(defn board-size () 6)
+
+(defn globals () (get parent))
+
+(defn init-board () (defq (globals) board (empty-board (board-size))))
+
+(defn init () (do
+    (init-board)
+    (puts 'The starting board is:')
+    (display-board)
+))
+
+(defq color-to-name (hash
+    [\b \Black]
+    [\w \White]
+))
+
+(defq opposites (hash
+    [\b \w]
+    [\w \b]
+))
+
+(defn move-f (input) [t 'Not implemented!'])
+
+(defn display-board () (puts (display board)))
+
+(defm move (input success failure) (` (let
+    (result (move-f (, input)))
+    (if (car result) (, success) (let (err (sec result)) (, failure)))
+)))
+
+(defn opposite () (get opposites *to-play*))
+
+(defn player-name () (get color-to-name *to-play*))
+
+(defn prompt () (~ 'Turn for ' (player-name) ': '))
+
+(defq *to-play* \b)
+
+(init)
+
+(defn main (reply) (move reply
+    (do (puts 'The new board is:') (display-board) (setq *to-play* (opposite)))
+    (puts err)
+))
