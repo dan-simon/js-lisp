@@ -1,3 +1,9 @@
+'use strict';
+
+var js_lisp_types = require('./js_lisp_types_4');
+
+var escapes = js_lisp_types.escapes;
+
 var tokenize_wo_strings = function (s) {
     return s.replace(/\(/g, ' ( ').replace(/\)/g, ' ) ').
         replace(/\[/g, ' [ ').replace(/\]/g, ' ] ').split(/[ \t\n]/g).
