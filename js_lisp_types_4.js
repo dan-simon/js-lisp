@@ -254,10 +254,14 @@ IntFunction.prototype.call = function (params, scope) {
 }
 
 IntFunction.prototype.eq = function (y) {
-    if (!(y instanceof IntFunction)) {
+    if (!(y instanceof IntFunction) || this.s !== y.s) {
         return false;
     }
-    throw 'Functions cannot be compared!';
+    if (this.s === undefined) {
+        throw 'Functions cannot be compared!';
+    } else {
+        return true;
+    }
 }
 
 IntFunction.prototype.get_type = function () {

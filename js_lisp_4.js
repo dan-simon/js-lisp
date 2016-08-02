@@ -213,6 +213,15 @@ var ceil = new IntFunction(function (args) {
     return new IntNumber(Math.ceil(x.n));
 });
 
+var intp = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'int?');
+    if (!(x instanceof IntNumber)) {
+        throw 'int? only checks whether numbers are integers!';
+    }
+    var x_n = x.n;
+    return int_bool_from(x_n === Math.floor(x_n));
+});
+
 var exit = new IntFunction(function (args) {
     if (args.len() !== 0) {
         throw 'exit takes no arguments!';
@@ -766,6 +775,7 @@ global_scope.hash['/'] = div;
 global_scope.hash['%'] = mod;
 global_scope.hash.floor = floor;
 global_scope.hash.ceil = ceil;
+global_scope.hash['int?'] = intp;
 global_scope.hash.quote = quote;
 global_scope.hash.list = make_list;
 global_scope.hash.exit = exit;
