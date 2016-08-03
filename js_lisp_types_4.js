@@ -412,6 +412,36 @@ List.prototype.filter = function (f, scope) {
     return result;
 }
 
+List.prototype.any = function (f, scope) {
+    if (!(f instanceof IntFunction)) {
+        throw 'You can only use any? with a function.';
+    }
+    var l = this.list;
+    var w;
+    for (var i = 0; i < l.length; i++) {
+        w = f.call(new List([l[i]]), scope);
+        if (!(w instanceof List && w.len() === 0)) {
+            return new TType();
+        }
+    }
+    return new List([]);
+}
+
+List.prototype.all = function (f, scope) {
+    if (!(f instanceof IntFunction)) {
+        throw 'You can only use all? with a function.';
+    }
+    var l = this.list;
+    var w;
+    for (var i = 0; i < l.length; i++) {
+        w = f.call(new List([l[i]]), scope);
+        if (w instanceof List && w.len() === 0) {
+            return new List([]);
+        }
+    }
+    return new TType();
+}
+
 List.prototype.concat = function () {
     return new List([].concat.apply(
         [], this.list.map(function (x) {return x.list})));

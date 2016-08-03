@@ -154,9 +154,18 @@ var sub = new IntFunction(function (args) {
     return new IntNumber(dif);
 });
 
-var check_d = function (item, s) {
+var check_d = function (item) {
     if (!(item instanceof IntNumber)) {
         throw '/ only divides numbers!';
+    }
+    if (item.n === 0) {
+        throw 'Cannot divide by zero.';
+    }
+}
+
+var check_int_d = function (item) {
+    if (!(item instanceof IntNumber)) {
+        throw '// only divides numbers!';
     }
     if (item.n === 0) {
         throw 'Cannot divide by zero.';
@@ -178,6 +187,25 @@ var div = new IntFunction(function (args) {
         var item = args.at(i);
         check_d(item);
         quot /= item.n;
+    }
+    return new IntNumber(quot);
+});
+
+var int_div = new IntFunction(function (args) {
+    var l = args.len();
+    var item;
+    if (l === 0)  {
+        return new IntNumber(1);
+    } else if (l == 1) {
+        item = args.car();
+        check_int_d(item);
+        return new IntNumber(Math.floor(1 / item.n));
+    }
+    var quot = args.at(0).n;
+    for (var i = 1; i < args.len(); i++) {
+        var item = args.at(i);
+        check_int_d(item);
+        quot = Math.floor(quot / item.n);
     }
     return new IntNumber(quot);
 });
@@ -772,6 +800,7 @@ global_scope.hash['*'] = times;
 global_scope.hash['**'] = pow;
 global_scope.hash['-'] = sub;
 global_scope.hash['/'] = div;
+global_scope.hash['//'] = int_div;
 global_scope.hash['%'] = mod;
 global_scope.hash.floor = floor;
 global_scope.hash.ceil = ceil;
@@ -1508,6 +1537,28 @@ global_scope.hash.filter = new IntFunction(function (args, scope) {
         throw 'filter\'s second argument must be a list.';
     }
     return y.filter(args.car(), scope);
+});
+
+global_scope.hash['any?'] = new IntFunction(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'any? takes two arguments!';
+    }
+    var y = args.at(1);
+    if (!(y instanceof List)) {
+        throw 'any?\'s second argument must be a list.';
+    }
+    return y.any(args.car(), scope);
+});
+
+global_scope.hash['all?'] = new IntFunction(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'all? takes two arguments!';
+    }
+    var y = args.at(1);
+    if (!(y instanceof List)) {
+        throw 'all?\'s second argument must be a list.';
+    }
+    return y.all(args.car(), scope);
 });
 
 global_scope.hash.split = new IntFunction(function (args) {
