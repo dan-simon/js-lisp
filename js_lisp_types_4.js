@@ -294,8 +294,12 @@ IntFunction.prototype.callable = function () {
 
 var negate = new IntFunction(function (b) {
     var x = check_one_arg(b, 'internal function negate');
-    return int_bool_from(!js_to_bool(x));
+    return negate_js(x);
 });
+
+var negate_js = function (x) {
+    return int_bool_from(!js_to_bool(x));
+}
 
 var Macro = function (f) {
     this.f = f;
@@ -593,7 +597,7 @@ Hash.prototype.def = function (x, y) {
             throw 'Cannot define parent in ' + this.to_s() +
             'since it already exists; it is ' + this.parent.to_s() + '.';
         } else if (!(y instanceof Hash)) {
-            'Cannot define parent in ' + this.to_s() +
+            throw 'Cannot define parent in ' + this.to_s() +
             ' to be anything other than a hash, like ' + y.to_s() + '.';
         } else {
             this.parent = y;
@@ -973,5 +977,6 @@ module.exports = {
     'int_bool_from': int_bool_from,
     'js_to_bool': js_to_bool,
     'negate': negate,
+    'negate_js': negate_js,
     'check_one_arg': check_one_arg
 }

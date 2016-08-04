@@ -29,6 +29,7 @@ var string_in_form = js_lisp_types.string_in_form;
 var escapes = js_lisp_types.escapes;
 
 var int_bool_from = js_lisp_types.int_bool_from;
+var negate_js = js_lisp_types.negate_js;
 var negate = js_lisp_types.negate;
 var check_one_arg = js_lisp_types.check_one_arg;
 var js_to_bool = js_lisp_types.js_to_bool;
@@ -269,7 +270,8 @@ var make_list = new IntFunction(function (args) {
 var make_hash = new IntFunction(function (args) {
     var my_hash = new Hash();
     var item;
-    for (var i = 0; i < args.len(); i++) {
+    var len = args.len();
+    for (var i = 0; i < len; i++) {
         item = args.at(i);
         if (!(item instanceof List) || item.len() !== 2) {
             throw 'Unlike ' + item.to_s() +
@@ -280,14 +282,86 @@ var make_hash = new IntFunction(function (args) {
     return my_hash;
 });
 
-var global_get_type = new IntFunction(function (x) {
-    if (x.len() !== 1) {
-        throw 'type takes one argument.'
+var copy = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'copy');
+    if (x instanceof List) {
+        return new List(x.list.map(function (x) {return x}));
+    } else if (x instanceof Hash) {
+        var h = new Hash();
+        var l = x.keys().list;
+        var item;
+        for (var i = 0; i < l.length; i++) {
+            item = l[i];
+            h.def(item, x.get(item));
+        }
+        return h;
+    } else if (x.basic_type()) {
+        return x;
+    } else {
+        throw 'Cannot copy something of non-basic type that is not a list or hash!';
     }
-    if (typeof x.car().get_type !== 'function') {
+});
+
+var deepcopy_js = function (x) {
+    if (x instanceof List) {
+        return new List(x.list.map(function (x) {return deepcopy_js(x)}));
+    } else if (x instanceof Hash) {
+        var h = new Hash();
+        var l = x.keys().list;
+        var item;
+        for (var i = 0; i < l.length; i++) {
+            item = l[i];
+            h.def(item, deepcopy(x.get(item)));
+        }
+        return h;
+    } else if (x.basic_type()) {
+        return x;
+    } else {
+        throw 'Cannot deepcopy something of non-basic type that is not a list or hash!';
+    }
+};
+
+var deepcopy = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'deepcopy');
+    return deepcopy_js(x);
+});
+
+var object_id = (function () {
+    var current_id = 0;
+    return new IntFunction(function (args) {
+        var x = check_one_arg(args, 'object-id');
+        if (!('id' in x)) {
+            current_id++;
+            x.id = current_id;
+        }
+        return new IntNumber(x.id);
+    });
+})();
+
+var same = new IntFunction(function (args) {
+    var l = args.len();
+    if (l === 0) {
+        return new TType();
+    }
+    var a = args.car();
+    for (var i = 1; i < l; i++) {
+        if (a !== args.at(i)) {
+            return new List([]);
+        }
+    }
+    return new TType();
+});
+
+var different = new IntFunction(function (args) {
+    return negate_js(same.call(args));
+});
+
+var global_get_type = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'type');
+    if (typeof x.get_type !== 'function') {
         throw 'Serious implementation error: cannot get the type of ' + x.to_s() + '!';
     }
-    return x.car().get_type();
+    return x.get_type();
 });
 
 var global_do = new IntFunction(function (x) {
@@ -381,7 +455,7 @@ var convert_to = function (type_to) {
         var f = check_one_arg(args, 'internal function convert_to'); 
 
         if (!(is_fn_type(f))) {
-            throw 'f is not callable!'
+            throw f.to_s() + ' is not callable!'
         }
         return new type_to(f.f);
     });
@@ -824,6 +898,14 @@ global_scope.hash['id'] = new IntFunction(function (args) {
     return x;
 });
 
+global_scope.hash.copy = copy;
+global_scope.hash.deepcopy = deepcopy;
+
+global_scope.hash['object-id'] = object_id;
+
+global_scope.hash['same?'] = same;
+global_scope.hash['different?'] = different;
+
 global_scope.hash['number'] = new IntFunction(function (args) {
     var x = check_one_arg(args, 'number');
     if (x instanceof IntNumber) {
@@ -1233,13 +1315,12 @@ global_scope.hash['~'] = new IntFunction(function (args) {
 });
 
 var eq = new IntFunction(function (args) {
-    if (args.len() === 0) {
+    var l = args.len();
+    if (l === 0) {
         return new TType();
     }
-
     var a = args.car();
-
-    for (var i = 1; i < args.len(); i++) {
+    for (var i = 1; i < l; i++) {
         if (!(a.eq(args.at(i)))) {
             return new List([]);
         }
@@ -1284,7 +1365,7 @@ global_scope.hash['chars'] = new IntFunction(function (args) {
 global_scope.hash['='] = eq;
 
 global_scope.hash['!='] = new IntFunction(function (args) {
-    return negate.call(new List([eq.call(args)]));
+    return negate_js(eq.call(args));
 });
 
 var js_compare_values = function (a, b) {
