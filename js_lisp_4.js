@@ -282,10 +282,13 @@ var make_hash = new IntFunction(function (args) {
     return my_hash;
 });
 
-var copy = new IntFunction(function (args) {
-    var x = check_one_arg(args, 'copy');
+var copy_list = function (x) {
+    return x.map(function (x) {return x});
+}
+
+var copy_js = function (x) {
     if (x instanceof List) {
-        return new List(x.list.map(function (x) {return x}));
+        return new List(copy_list(x.list));
     } else if (x instanceof Hash) {
         var h = new Hash();
         var l = x.keys().list;
@@ -300,6 +303,11 @@ var copy = new IntFunction(function (args) {
     } else {
         throw 'Cannot copy something of non-basic type that is not a list or hash!';
     }
+};
+
+var copy = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'copy');
+    return copy_js(x);
 });
 
 var deepcopy_js = function (x) {
@@ -1501,14 +1509,13 @@ global_scope.hash.sort = new IntFunction(function (args) {
     if (!(f instanceof IntFunction)) {
         throw 'The second argument of sort muct be a function, not ' + x.to_s() + '!';
     }
-    x.list.sort(function (a, b) {
+    return new List(copy_list(x.list).sort(function (a, b) {
         var r = f.call(new List([a, b]));
         if (!(r instanceof IntNumber)) {
             throw 'A sorting function produced a non-number, ' + r.to_s() + '!';
         }
         return r.n;
-    });
-    return x;
+    }));
 });
 
 global_scope.hash.min = new IntFunction(function (args) {
@@ -1648,10 +1655,10 @@ global_scope.hash.split = new IntFunction(function (args) {
     }
     var x = args.car();
     var y = args.at(1);
-    if (!x.basic_type) {
+    if (!x.basic_type()) {
         throw 'The first argument of split must be a basic type.';
     }
-    if (!y.basic_type) {
+    if (!y.basic_type()) {
         throw 'The second argument of split must be a basic type.';
     }
     var parts = x.to_s_text().split(y.to_s_text());
@@ -1669,7 +1676,7 @@ global_scope.hash.join = new IntFunction(function (args) {
     if (!(x instanceof List)) {
         throw 'The first argument of join must be a list.';
     }
-    if (!y.basic_type) {
+    if (!y.basic_type()) {
         throw 'The second argument of join must be a basic type.';
     }
     return string_concat_join(x, new IntString(y.to_s_text()), 'join');
@@ -1703,7 +1710,7 @@ global_scope.hash.reverse = new IntFunction(function (args, scope) {
         throw 'reverse\'s argument must be a list or string.';
     }
     if (x instanceof List) {
-        return new List(x.list.reverse());
+        return new List(copy_list(x.list).reverse());
     } else {
         return new IntString(x.s.split('').reverse().join(''));
     }
