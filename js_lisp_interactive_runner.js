@@ -6,6 +6,9 @@ var global_scope = jslisp.global_scope;
 var show_prompt = function () {process.stdin.write('>>> ')}
 var stdin = process.openStdin();
 fs.readFile(file_name, 'utf8', function (err, t) {
+    if (err !== null) {
+        throw err;
+    }
     // We just wrap with do.
     t = '(do ' + t + ')';
     var pre_ast = jslisp.parse(jslisp.tokenize(t));
@@ -14,10 +17,10 @@ fs.readFile(file_name, 'utf8', function (err, t) {
     var m = new jslisp.IntString('main');
     var p = new jslisp.IntString('prompt');
     var main_f = global_scope.get(m);
-    var get_prompt = global_scope.get(p);
+    var pr = global_scope.get(p);
     var show_prompt = function () {
         try {
-            var p_val = get_prompt.call(new jslisp.List([]));
+            var p_val = pr.call(new jslisp.List([]))
             if (!(p_val instanceof jslisp.IntString)) {
                 throw '(prompt) must be a string.'
             }
