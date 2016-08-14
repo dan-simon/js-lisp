@@ -2,7 +2,7 @@ This is yet another simple Lisp in JavaScript. It's only here because I wanted t
 
 The current licence is MIT.
 
-To use it, download the files in it and run the js_lisp_4 file with node. (Yes, versions 1, 2, and 3 existed in the past, but 4 has been around for a long time.)
+To use it, download the files in it and run the js_lisp_5 file with node. (Version 5 is relatively new, but is actually not that different from Version 4.)
 
 It has:
 

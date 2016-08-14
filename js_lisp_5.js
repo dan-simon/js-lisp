@@ -3,12 +3,12 @@
 // An actual lisp.
 // Lexically scoped.
 
-var js_lisp_parse = require('./js_lisp_parse_4');
+var js_lisp_parse = require('./js_lisp_parse_5');
 
 var parse = js_lisp_parse.parse;
 var tokenize = js_lisp_parse.tokenize;
 
-var js_lisp_types = require('./js_lisp_types_4');
+var js_lisp_types = require('./js_lisp_types_5');
 
 var TType = js_lisp_types.TType;
 var IntNumber = js_lisp_types.IntNumber;
@@ -490,6 +490,17 @@ var hash_method = function (method_name, num_args) {
     });
 }
 
+var in_scope = new Syntax(function (args, scope) {
+    if (args.len() !== 2) {
+        throw 'in-scope takes two arguments!';
+    }
+    var new_scope = scope.eval(args.car());
+    if (!(new_scope instanceof Hash)) {
+        throw new_scope.to_s() + ' cannot be used as a scope!';
+    }
+    return new_scope.eval(args.at(1));
+});
+
 var g_sec = new IntFunction(function (args) {
     var x = check_one_arg(args, 'sec');
     if (!(x instanceof List || x instanceof IntString)) {
@@ -905,6 +916,7 @@ global_scope.hash['id'] = new IntFunction(function (args) {
     var x = check_one_arg(args, 'id');
     return x;
 });
+global_scope.hash['in-scope'] = in_scope;
 
 global_scope.hash.copy = copy;
 global_scope.hash.deepcopy = deepcopy;

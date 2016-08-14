@@ -1,6 +1,6 @@
 'use strict';
 
-var js_lisp_types = require('./js_lisp_types_4');
+var js_lisp_types = require('./js_lisp_types_5');
 
 var escapes = js_lisp_types.escapes;
 

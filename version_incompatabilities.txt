@@ -1,0 +1,1 @@
+The change from 4 to 5 should not break anything, unless a new builtin was used as a variable name, which should be clear from the error message.

@@ -17,7 +17,7 @@
     (gcd (number (car replies)) (number (sec replies)))
 ))
 
-(defn prompt () (nth asked prompts))
+(defn prompt () (nth prompts asked))
 
 (defn main (s) (do
     (push replies s)
