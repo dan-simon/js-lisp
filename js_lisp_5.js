@@ -211,19 +211,55 @@ var int_div = new IntFunction(function (args) {
     return new IntNumber(quot);
 });
 
-var mod = new IntFunction(function (args) {
+var remainder = new IntFunction(function (args) {
     if (args.len() !== 2) {
         throw '% takes two arguments.';
     }
     var x = args.at(0);
     var y = args.at(1);
+    var x_n = x.n;
+    var y_n = y.n;
     if (!(x instanceof IntNumber && y instanceof IntNumber)) {
-        throw '% only does modulus on numbers!';
+        throw '% only does remainder on numbers!';
     }
-    if (y.n === 0) {
+    if (y_n === 0) {
+        throw 'Cannot do remainder by zero.';
+    }
+    return new IntNumber(x_n % y_n);
+});
+
+var mod = new IntFunction(function (args) {
+    if (args.len() !== 2) {
+        throw 'mod takes two arguments.';
+    }
+    var x = args.at(0);
+    var y = args.at(1);
+    var x_n = x.n;
+    var y_n = y.n;
+    if (!(x instanceof IntNumber && y instanceof IntNumber)) {
+        throw 'mod only does modulus on numbers!';
+    }
+    if (y_n === 0) {
         throw 'Cannot do modulus by zero.';
     }
-    return new IntNumber(x.n % y.n);
+    return new IntNumber((x_n % y_n + y_n) % y_n);
+});
+
+var div = new IntFunction(function (args) {
+    if (args.len() !== 2) {
+        throw 'div? takes two arguments.';
+    }
+    var x = args.at(0);
+    var y = args.at(1);
+    var x_n = x.n;
+    var y_n = y.n;
+    if (!(x instanceof IntNumber && y instanceof IntNumber)) {
+        throw 'div? only does modulus on numbers!';
+    }
+    if (y_n === 0) {
+        throw 'Cannot do divisibility testing by zero.';
+    }
+    return int_bool_from(x_n % y_n === 0);
 });
 
 var floor = new IntFunction(function (args) {
@@ -894,7 +930,9 @@ global_scope.hash['**'] = pow;
 global_scope.hash['-'] = sub;
 global_scope.hash['/'] = div;
 global_scope.hash['//'] = int_div;
-global_scope.hash['%'] = mod;
+global_scope.hash['%'] = remainder;
+global_scope.hash.mod = mod;
+global_scope.hash['div?'] = div;
 global_scope.hash.floor = floor;
 global_scope.hash.ceil = ceil;
 global_scope.hash['int?'] = intp;
