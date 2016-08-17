@@ -1070,6 +1070,13 @@ global_scope.hash.choice = new IntFunction(function (args) {
     return x.at(Math.floor(Math.random() * l));
 });
 
+global_scope.hash.time = new IntFunction(function (args) {
+    if (args.len() !== 0) {
+        throw 'time takes no arguments!';
+    }
+    return new IntNumber(new Date().getTime());
+});
+
 var concat_lists = new IntFunction(function (args, scope) {
     return new List([].concat.apply([], args.list.map(function (x) {
         if (x instanceof List) {

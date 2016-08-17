@@ -1,0 +1,24 @@
+(defn concat-map (f l) ((apply concat) (map f l)))
+
+(defn n-queens (n) (l [[]]) (r (range 0 n)) (prev-rows []) (do
+    (each (fn (new-row) (do
+        (if (!= new-row 0) (push prev-rows (1- new-row)))
+        (setq l (concat-map (fn (current-solution) (map
+            (fn (x) (concat current-solution [x]))
+            (filter (fn (col) (all?
+                (fn (earlier) (let
+                    (z (nth current-solution earlier))
+                    (diff (- new-row earlier))
+                    (not (elem? col [z (+ z diff) (- z diff)]))))
+                prev-rows))
+            r)))
+        l))))
+    r)
+l))
+
+(each (fn (x) (do
+    (defq t0 (time))
+    (defq q (n-queens x))
+    (defq t1 (time))
+    (print x (len q) (- t1 t0) '')
+)) (range 9 10))

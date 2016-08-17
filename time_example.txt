@@ -1,0 +1,3 @@
+(defn prompt () 'Type in something (anything) to get the current time! ')
+
+(defn main _ (puts (time)))

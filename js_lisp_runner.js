@@ -11,6 +11,11 @@ fs.readFile(file_name, 'utf8', function (err, t) {
     t = '(do ' + t + ')';
     var pre_ast = jslisp.parse(jslisp.tokenize(t));
     var ast = jslisp.transform_list(pre_ast);
-    global_scope.eval(ast);
+    try {
+    	global_scope.eval(ast);
+    } catch (e) {
+    	console.log('There was an exception: ');
+    	console.log(e);
+    }
 });
 
