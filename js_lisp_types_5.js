@@ -737,15 +737,17 @@ Hash.prototype['bind-all'] = function (x, y) {
         throw 'Serious implementation error: cannot get the type of ' + x.to_s() + '!';
     }
     if (x instanceof IntSymbol) {
-        if (x.name === '*') {
+        var x_n = x.name;
+        if (x_n === '*') {
             this.extend(y);
-        } else {
+        } else if (x_n !== '_') {
             this.def(x, y);
         }
-        return;
+        return y;
     }
     if (!(x instanceof List)) {
-        throw 'The left side of a recursive defintion must be a symbol or list!';
+        throw 'The left side of a recursive defintion must be a symbol or list, not ' +
+        x.to_s() + '!';
     }
 
     var l = x.len();
