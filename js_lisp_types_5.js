@@ -748,13 +748,21 @@ Hash.prototype['bind-all'] = function (x, y) {
         throw 'The left side of a recursive defintion must be a symbol or list!';
     }
 
+    var l = x.len();
+    var i;
+
+    if (l !== 0 && x.car() instanceof IntSymbol && x.car().name === '@') {
+        for (i = 1; i < l; i++) {
+            this['bind-all'](x.at(i), y);
+        }
+        return y;
+    }
+
     if (!(y instanceof List)) {
         throw 'The right side of a recursive definition must be a list '
         + 'if the right side is!';
     }
 
-    var i;
-    var l = x.len();
     var y_l = y.len();
     var x_i;
     var rest_loc = -1;
