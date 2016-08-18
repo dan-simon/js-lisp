@@ -808,14 +808,6 @@ var car_cdr = function (s) {
     }, 'c' + s + 'r');
 }
 
-var macro_expand = new Syntax(function (args, scope) {
-    var x = scope.eval(args.car());
-    if (!(x instanceof Macro)) {
-        throw 'You can only expand a macro!';
-    }
-    return x.macro_call(args.cdr(), scope);
-});
-
 var global_splat = new IntFunction(function (f_args) {
     var f = check_one_arg(f_args, 'splat');
     var l = [IntFunction, Macro, Syntax];
@@ -1343,8 +1335,6 @@ global_scope.hash['defs'] = define_construct(Syntax, 'defs', 'syntax');
 global_scope.hash['fn-from'] = convert_to(IntFunction);
 global_scope.hash['mac-from'] = convert_to(Macro);
 global_scope.hash['syn-from'] = convert_to(Syntax);
-
-global_scope.hash['macro-expand'] = macro_expand;
 
 global_scope.hash.apply = global_apply;
 global_scope.hash.splat = global_splat;
