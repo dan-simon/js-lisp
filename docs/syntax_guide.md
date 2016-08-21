@@ -1,3 +1,5 @@
+This file contains information relating to syntax.
+
 The allowed constructions are these:
 * Normal parentheses: (+ 2 2) evaluates to 4
 * Brackets: [+ 2 2] evaluates to a list with +, 2, and 2. It is equivalent to (list + 2 2).
