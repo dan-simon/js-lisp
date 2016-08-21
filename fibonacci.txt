@@ -1,0 +1,5 @@
+(defn memoize (f) (h (hash)) (fn (x) (if (has? h x) (get h x) (def h x (f x)))))
+
+(defq fib (memoize (fn (n) (if (< n 2) n (+ (fib (- n 1)) (fib (- n 2)))))))
+
+(print (fib 12))
