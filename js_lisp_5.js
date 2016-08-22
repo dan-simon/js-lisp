@@ -278,6 +278,14 @@ var ceil = new IntFunction(function (args) {
     return new IntNumber(Math.ceil(x.n));
 });
 
+var abs = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'abs');
+    if (!(x instanceof IntNumber)) {
+        throw 'abs only takes the absolute value of numbers!';
+    }
+    return new IntNumber(Math.abs(x.n));
+});
+
 var intp = new IntFunction(function (args) {
     var x = check_one_arg(args, 'int?');
     if (!(x instanceof IntNumber)) {
@@ -927,6 +935,7 @@ global_scope.hash.mod = mod;
 global_scope.hash['div?'] = div;
 global_scope.hash.floor = floor;
 global_scope.hash.ceil = ceil;
+global_scope.hash.abs = abs;
 global_scope.hash['int?'] = intp;
 global_scope.hash.quote = quote;
 global_scope.hash.list = make_list;
