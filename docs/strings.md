@@ -1,0 +1,1 @@
+For documentation about strings see lists.md. This was done because strings have two functions relating to lists.
