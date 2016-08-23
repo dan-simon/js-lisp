@@ -245,7 +245,7 @@ var mod = new IntFunction(function (args) {
     return new IntNumber((x_n % y_n + y_n) % y_n);
 });
 
-var div = new IntFunction(function (args) {
+var div_test = new IntFunction(function (args) {
     if (args.len() !== 2) {
         throw 'div? takes two arguments.';
     }
@@ -932,7 +932,7 @@ global_scope.hash['/'] = div;
 global_scope.hash['//'] = int_div;
 global_scope.hash['%'] = remainder;
 global_scope.hash.mod = mod;
-global_scope.hash['div?'] = div;
+global_scope.hash['div?'] = div_test;
 global_scope.hash.floor = floor;
 global_scope.hash.ceil = ceil;
 global_scope.hash.abs = abs;
