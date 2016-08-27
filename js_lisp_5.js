@@ -687,7 +687,7 @@ var global_throw = new IntFunction(function (args) {
 var pass_scope = new IntFunction(function (args, lexical) {
     var f = check_one_arg(args, 'pass-scope');
     if (!f.callable()) {
-        throw 'The parameter to pass-scope should ba callable!';
+        throw 'The parameter to pass-scope should be callable!';
     }
     var g = f.f;
     var h = function (args, internal_scope) {
@@ -704,7 +704,7 @@ var pass_scope = new IntFunction(function (args, lexical) {
 var pass_eval = new IntFunction(function (args, lexical) {
     var f = check_one_arg(args, 'pass-eval');
     if (!f.callable()) {
-        throw 'The parameter to pass-eval should ba callable!';
+        throw 'The parameter to pass-eval should be callable!';
     }
     var g = f.f;
     var n = function (internal_scope) {
