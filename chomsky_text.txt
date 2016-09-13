@@ -104,11 +104,11 @@
 )
 
 (defn wrap (text max-chars-per-line)
-    (words (split text ' ')) (lines [[]]) (chars-in-line 0) (do
+    (words (split text ' ')) (lines [[]]) (chars-in-line -1) (do
     (each (fn (word) (let
         (new-chars-in-line (+ chars-in-line (len word) 1))
         (overflow (< max-chars-per-line new-chars-in-line)) (if overflow
-	        (do (push lines [word]) (setq chars-in-line (1+ (len word))))
+	        (do (push lines [word]) (setq chars-in-line (len word)))
 	        (do (push (last lines) word) (setq chars-in-line new-chars-in-line)))
     )) words)
     (join (map (fn (line) (join line ' ')) lines) '\n'))
