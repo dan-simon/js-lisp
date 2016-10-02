@@ -677,10 +677,7 @@ var repeat = new Syntax(function (args, scope) {
 });
 
 var global_throw = new IntFunction(function (args) {
-    var x = check_one_arg(args, 'throw');
-    if (!(x instanceof IntString)) {
-        throw 'Throwing something other than a string!';
-    }
+    var x = string_concat_join(args, new IntString(''), 'throw');
     throw x.s;
 });
 

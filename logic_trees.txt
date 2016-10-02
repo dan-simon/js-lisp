@@ -1,0 +1,68 @@
+(defn set-from (x) ((apply hash) (map (fn (i) [i t]) x)))
+
+(defn diff-pairs (a b) (filter (fn (i) (not (has? b (car i)))) (pairs a)))
+
+(defn diff (a b) ((apply hash) (diff-pairs a b)))
+
+(defn union (a b) ((apply hash) (concat (pairs a) (diff-pairs b a))))
+
+(defn plural (n) (if (= n 1) '' 's'))
+
+(defn check-binary (x) (if (list? x) (do
+    (if (!= (len x) 2) (throw (str-code x) ' does not have two items.'))
+    (each check-binary x))))
+
+(defn vars-in (tree exclude) (cond
+    ((list? tree) (union (vars-in (car tree) exclude) (vars-in (sec tree) exclude)))
+    ((has? exclude tree) (hash))
+    (t (set-from [tree]))))
+
+(defn rule-with-scope (scope a b) (do
+    (if (has? scope \atoms)
+        (defq atoms (set-from (get scope \atoms)))
+        (throw 'No atoms defined!'))
+    (check-binary a)
+    (check-binary b)
+    (defq hanging-vars (keys (diff (vars-in b atoms) (vars-in a atoms))))
+    (if hanging-vars (throw 'Undefined variable' (plural (len hanging-vars))
+        ': ' (join hanging-vars ', ')))
+    (hash [\atoms atoms] [\left a] [\right b])))
+
+(defq rule (syn-from (pass-scope rule-with-scope)))
+
+(defn apply-rule (rule left) (h (hash)) (do
+    (check-binary left)
+    (defq success (corr left (get rule \left) (get rule \atoms) h))
+    (if success (apply-corr (get rule \right) h) nil)))
+
+(defn corr (left rule atoms h) (cond
+    ((list? rule) (if (list? left) (and
+        (corr (car left) (car rule) atoms h)
+        (corr (sec left) (sec rule) atoms h)
+    ) nil))
+    ((has? atoms rule) (= left rule))
+    (t (if (has? h rule) (= left (get h rule)) (def h rule left)))))
+
+(defn apply-corr (right h) (cond
+    ((list? right) (map (fn (i) (apply-corr i h)) right))
+    ((has? h right) (get h right))
+    (t right)))
+
+(defn main () (atoms [1 2 3]) (rules [
+        (rule (2 x) (2 (x 2)))
+        (rule (1 (y (x 2))) (2 (x y)))
+        (rule ((x y) 2) (y x))
+        (rule ((x y) z) ((z x) y))
+        (rule (x (x y)) ((x y) (x y)))
+    ]) (do
+    (defq axiom (quote ((1 2) 3)))
+    (defq derivation-1 (apply-rule (nth rules 3) axiom))
+    (defq derivation-2 (apply-rule (nth rules 3) derivation-1))
+    (defq derivation-3 (apply-rule (nth rules 2) derivation-1))
+    (defq bad-derivation (apply-rule (nth rules 0) derivation-2))
+    (defq another-bad-derivation (apply-rule (nth rules 4) derivation-2))
+    (print axiom derivation-1 derivation-2 derivation-3
+        bad-derivation another-bad-derivation)
+))
+
+(main)
