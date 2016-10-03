@@ -904,6 +904,142 @@ var global_at = new IntFunction(function (args) {
     return x.at(y.n);
 });
 
+// math object start
+
+var builtin_math = new Hash();
+
+var math_consts = ['E', 'LN2', 'LN10', 'LOG2E', 'LOG10E', 'PI', 'SQRT1_2'];
+
+var math_funcs = [
+    ['acos', 1],
+    ['acosh', 1],
+    ['asin', 1],
+    ['asinh', 1],
+    ['atan', 1],
+    ['atanh', 1],
+    ['atan2', 2],
+    ['cbrt', 1],
+    ['clz32', 1],
+    ['cos', 1],
+    ['cosh', 1],
+    ['exp', 1],
+    ['expm1', 1],
+    ['fround', 1],
+    ['hypot', null],
+    ['imul', 2],
+    ['log', 1],
+    ['log1p', 1],
+    ['log10', 1],
+    ['log2', 1],
+    ['round', 1],
+    ['sign', 1],
+    ['sin', 1],
+    ['sinh', 1],
+    ['sqrt', 1],
+    ['tan', 1],
+    ['tanh', 1],
+    ['trunc', 1]
+];
+
+(function () {
+    var i;
+    for (i = 0; i < math_consts.length; i++) {
+        builtin_math.def(
+            new IntString(math_consts[i]),
+            new IntNumber(Math[math_consts[i]]));
+    }
+    var f;
+    var var_name;
+    for (i = 0; i < math_funcs.length; i++) {
+        var_name = math_funcs[i][0];
+        f = (function (num_args, builtin_name, builtin_math) {
+            return function (args) {
+                var items = args.list;
+                var l = items.length;
+                if (num_args !== null && num_args !== l) {
+                    throw 'Wrong number of arguments for math function ' +
+                    builtin_name + ': ' + l + ' instead of ' + num_args +
+                    '. They are ' + args.to_s() + '.';
+                }
+                var inputs = [];
+                var input;
+                for (var i = 0; i < items.length; i++) {
+                    input = items[i];
+                    if (!(input instanceof IntNumber)) {
+                        throw input.to_s() + '(one of the arguments for math function ' +
+                        builtin_name + ') is not a number. The arguments are ' +
+                        args.to_s() + '.';
+                    }
+                    inputs.push(input.n);
+                }
+                var r = builtin_math.apply(null, inputs);
+                if (!isFinite(r)) {
+                    throw 'Bad arguments ' + args.to_s() + ' for math function ' +
+                    builtin_name + ' (perhaps out of its domain).';
+                }
+                return new IntNumber(r);
+            }
+        })(math_funcs[i][1], var_name, Math[var_name]);
+        builtin_math.def(
+            new IntString(var_name),
+            new IntFunction(f)
+        );
+    }
+})();
+
+// math object end
+
+// bitwise object start
+
+var create_bitwise = function (name, f) {
+    return new IntFunction(function (args) {
+        var l = args.len();
+        if (l !== 2) {
+            throw 'Bitwise operator ' + name + ' requires exactly 2 arguments, not ' + l +
+            '. The arguments are' + args.to_s();
+        }
+        var x = args.car();
+        var y = args.at(1);
+        if (!(x instanceof IntNumber)) {
+            throw 'The first argument of bitwise operator ' + name +
+            ' must be a number, but it is ' + x.to_s() + '.';
+        }
+        if (!(y instanceof IntNumber)) {
+            throw 'The second argument of bitwise operator ' + name +
+            ' must be a number, but it is ' + y.to_s() + '.';
+        }
+        return new IntNumber(f(x.n, y.n));
+    });
+}
+
+var create_unary_bitwise = function (name, f) {
+    return new IntFunction(function (args) {
+        var x = check_one_arg(args);
+        if (!(x instanceof IntNumber)) {
+            throw 'The single argument of bitwise operator ' + name +
+            ' must be a number, but it is ' + x.to_s() + '.';
+        }
+        return new IntNumber(f(x.n));
+    });
+}
+
+var bitwise = new Hash();
+
+bitwise.def(new IntString('&'), create_bitwise('&', function (x, y) {return x & y}));
+
+bitwise.def(new IntString('|'), create_bitwise('|', function (x, y) {return x | y}));
+
+bitwise.def(new IntString('^'), create_bitwise('^', function (x, y) {return x ^ y}));
+
+bitwise.def(new IntString('<<'), create_bitwise('<<', function (x, y) {return x << y}));
+
+bitwise.def(new IntString('>>'), create_bitwise('>>', function (x, y) {return x >> y}));
+
+bitwise.def(new IntString('>>>'), create_bitwise('>>>', function (x, y) {return x >>> y}));
+
+bitwise.def(new IntString('~'), create_unary_bitwise('~', function (x) {return ~x}));
+
+// bitwise object end
 
 var global_nil = new List([]);
 
@@ -1838,6 +1974,10 @@ global_scope.hash['`'] = g_quasi_quote;
 global_scope.hash[','] = should_be_in_quasiquote(',');
 
 global_scope.hash['@,'] = should_be_in_quasiquote('@,');
+
+global_scope.hash.math = builtin_math;
+
+global_scope.hash.bitwise = bitwise;
 
 var get_t_scope = function () {
     var t_scope = new Hash();
