@@ -23,7 +23,19 @@ var string_in_form = function (string) {
     return '\'' + string + '\'';
 }
 
-var escapes = {'n': '\n', '\\': '\\', '\'': '\'', '"': '"', 't': '\t', '\n': '', 's': ''};
+var escapes = {
+    'b': '\b',
+    'f': '\f',
+    'n': '\n',
+    'r': '\r',
+    's': '',
+    't': '\t',
+    '\\': '\\',
+    '/': '/',
+    '\'': '\'',
+    '"': '"',
+    '\n': ''
+};
 
 var TType = function () {}
 

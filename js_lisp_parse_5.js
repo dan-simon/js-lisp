@@ -4,6 +4,25 @@ var js_lisp_types = require('./js_lisp_types_5');
 
 var escapes = js_lisp_types.escapes;
 
+var hex = {
+    '0': 0,
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '4': 4,
+    '5': 5,
+    '6': 6,
+    '7': 7,
+    '8': 8,
+    '9': 9,
+    'a': 10,
+    'b': 11,
+    'c': 12,
+    'd': 13,
+    'e': 14,
+    'f': 15
+}
+
 var tokenize_wo_strings = function (s) {
     return s.replace(/\(/g, ' ( ').replace(/\)/g, ' ) ').
         replace(/\[/g, ' [ ').replace(/\]/g, ' ] ').split(/[ \t\n]/g).
@@ -34,13 +53,30 @@ var find_quotes = function (s) {
                 result.push(item);
             }
         } else if (mode[1] === '\\') {
-            if (item in escapes) {
-                q.push(escapes[item]);
+            var l_item = item.toLowerCase();
+            if (l_item in escapes) {
+                q.push(escapes[l_item]);
+                mode = mode[0];
+            } else if (l_item === 'u') {
+                var u_char = 0;
+                i++;
+                if (!(i < len && s[i].toLowerCase() in hex)) {
+                    throw 'Empty Unicode escape.';
+                }
+                while (i < len && s[i] !== mode[0] && s[i].toLowerCase() in hex) {
+                    u_char *= 16;
+                    u_char += hex[s[i].toLowerCase()];
+                    i++;
+                }
+                q.push(String.fromCharCode(u_char));
+                if (i === len || s[i] !== '.') {
+                    i--;
+                }
                 mode = mode[0];
             } else {
-                throw 'Improper escape (in ' + s + ')\n' +
-                'In the region ' + s.slice(Math.max(0, i - 5),
-                    Math.min(s.length - 1, i + 5));
+                throw 'Improper escape character ' + item +
+                ' (in ' + s + ')\n' + 'In the region ' +
+                s.slice(Math.max(0, i - 5), Math.min(s.length, i + 5));
             }
         } else {
             if (item === mode) {
