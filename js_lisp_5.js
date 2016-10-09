@@ -34,11 +34,13 @@ var negate = js_lisp_types.negate;
 var check_one_arg = js_lisp_types.check_one_arg;
 var js_to_bool = js_lisp_types.js_to_bool;
 
+var num_regex = /^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/;
+
 var number_p = function (node, replace) {
     if (replace) {
         node = node.replace('/_/g', '');
     }
-    return node.match(/^-?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/);
+    return num_regex.test(node);
 }
 
 var number_from = function (node) {
