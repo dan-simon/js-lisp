@@ -803,7 +803,7 @@ var car_cdr = function (s) {
         var x = args.car();
         for (var i = s.length - 1; i > -1; i--) {
             if (!(x instanceof List || x instanceof IntString)) {
-                throw 'Only lists and strings have a car or cdr.'
+                throw 'Only lists and strings have a car or cdr, unlike ' + x.to_s() + '.';
             }
             if (s[i] === 'a') {
                 x = x.car();

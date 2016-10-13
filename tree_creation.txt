@@ -1,0 +1,40 @@
+(defq string-type (type-from \string))
+
+(defn string? (x) (= (type x) (type-from \string)))
+
+(defq *commands* (hash
+    [\moved (fn (h x) (cons (~ \< (car x) \>) (cdr x)))]
+    [\def (fn (h x y) (def h x y))]
+    [\bar (fn (h x) (~ x "'"))]
+))
+
+(defn tree-to-text (tree) (if
+    (list? tree)
+    (~ '[.' (car tree) ' ' (join (map tree-to-text (cdr tree)) ' ') ' ]')
+    tree
+))
+
+(defn process-tree (tree h) (cond
+    ((atom? tree) (if (has? h tree) (get h tree) (~ tree)))
+    ((not tree) (throw 'Empty tree reached!'))
+    ((and (atom? (car tree)) (has? *commands* (car tree))) (
+        (apply (get *commands* (car tree)))
+        (cons h (map (fn (i) (process-tree i h)) (cdr tree)))
+    ))
+    (t (map (fn (i) (process-tree i h)) tree))
+))
+
+(defn check (tree) (do
+    (unless (list? tree)
+        (throw (str tree) ' is not a list!'))
+    (unless tree
+         (throw (str tree) ' is empty!'))
+    (unless (string? (car tree))
+        (throw (str tree) ' does not have an initial string!'))
+    (unless (<= 2 (len tree) 3)
+        (throw (str tree) ' is of an improper length (' (len tree) ')!'))
+    (each (fn (i) (unless (string? i) (check i))) (cdr tree))
+    tree
+))
+
+(defs create-tree (tree) (~ '\\Tree ' (tree-to-text (check (process-tree tree (hash))))))
