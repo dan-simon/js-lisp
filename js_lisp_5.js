@@ -1043,11 +1043,109 @@ bitwise.def(new IntString('~'), create_unary_bitwise('~', function (x) {return ~
 
 // bitwise object end
 
+// functional object start
+
+var functional = new Hash();
+
+var compose = new IntFunction(function (args) {
+    var l = args.len();
+    if (l === 0) {
+        return global_id;
+    }
+    var last = args.last();
+    return new IntFunction(function (int_args) {
+        var result = last.call(int_args);
+        for (var i = l - 2; i > -1; i--) {
+            result = args.at(i).call(new List([result]));
+        }
+        return result;
+    });
+});
+
+var function_list_initial_check = function (args, name) {
+    if (args.len() !== 3) {
+        throw name + ' requires exactly three arguments.';
+    }
+    if (!(args.car() instanceof IntFunction)) {
+        throw 'The first argument of ' + name + ' must be a function, but it is ' +
+        args.car().to_s();
+    }
+    if (!(args.at(2) instanceof List)) {
+        throw 'The third (last) argument of ' + name + ' must be a list, but it is ' +
+        args.at(2).to_s();
+    }
+}
+
+var foldl = new IntFunction(function (args) {
+    function_list_initial_check(args, 'foldl');
+    var list = args.at(2);
+    var l = list.len();
+    var f = args.at(0);
+    var result = args.at(1);
+    for (var i = 0; i < l; i++) {
+        result = f.call(new List([result, list.at(i)]));
+    }
+    return result;
+});
+
+var foldr = new IntFunction(function (args) {
+    function_list_initial_check(args, 'foldr');
+    var list = args.at(2);
+    var l = list.len();
+    var f = args.at(0);
+    var result = args.at(1);
+    for (var i = l - 1; i > -1; i--) {
+        result = f.call(new List([list.at(i), result]));
+    }
+    return result;
+});
+
+var scanl = new IntFunction(function (args) {
+    function_list_initial_check(args, 'scanl');
+    var list = args.at(2);
+    var l = list.len();
+    var f = args.at(0);
+    var result = args.at(1);
+    var results = [result];
+    for (var i = 0; i < l; i++) {
+        result = f.call(new List([result, list.at(i)]));
+        results.push(result)
+    }
+    return new List(results);
+});
+
+var scanr = new IntFunction(function (args) {
+    function_list_initial_check(args, 'scanr');
+    var list = args.at(2);
+    var l = list.len();
+    var f = args.at(0);
+    var result = args.at(1);
+    var results = [result];
+    for (var i = l - 1; i > -1; i--) {
+        result = f.call(new List([list.at(i), result]));
+        results.push(result)
+    }
+    return new List(results.reverse());
+});
+
+functional.def(new IntString('compose'), compose);
+functional.def(new IntString('foldl'), foldl);
+functional.def(new IntString('foldr'), foldr);
+functional.def(new IntString('scanl'), scanl);
+functional.def(new IntString('scanr'), scanr);
+
+// functional object end
+
 var global_nil = new List([]);
 
 var global_t = new TType();
 
 var global_parent = new ParentType();
+
+var global_id = new IntFunction(function (args) {
+    var x = check_one_arg(args, 'id');
+    return x;
+});
 
 var global_scope = {'hash': {}};
 
@@ -1086,10 +1184,7 @@ global_scope.hash['pass-scope'] = pass_scope;
 global_scope.hash['throw'] = global_throw;
 global_scope.hash['do'] = global_do;
 global_scope.hash['void'] = global_void;
-global_scope.hash['id'] = new IntFunction(function (args) {
-    var x = check_one_arg(args, 'id');
-    return x;
-});
+global_scope.hash['id'] = global_id;
 global_scope.hash['in-scope'] = in_scope;
 
 global_scope.hash.copy = copy;
@@ -1908,6 +2003,7 @@ global_scope.hash.reverse = new IntFunction(function (args, scope) {
 });
 
 global_scope.hash.print = new IntFunction(function (args) {
+    var l = args.len();
     for (var i = 0; i < args.len(); i++) {
         console.log(args.at(i).to_s());
     }
@@ -1981,6 +2077,8 @@ global_scope.hash.math = builtin_math;
 
 global_scope.hash.bitwise = bitwise;
 
+global_scope.hash.functional = functional;
+
 var get_t_scope = function () {
     var t_scope = new Hash();
     for (var i in global_scope.hash) {
@@ -2024,7 +2122,7 @@ var transform_list = function (x) {
 }
 
 var show_prompt = function () {
-    process.stdin.write('>>> '); 
+    process.stdout.write('>>> '); 
 }
 
 var main = function () {
@@ -2034,7 +2132,7 @@ var main = function () {
 
     var t = '';
 
-    var stdin = process.openStdin();
+    var stdin = process.stdin;
 
     show_prompt();
 

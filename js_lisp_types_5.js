@@ -534,6 +534,16 @@ List.prototype.callable = function () {
     return false;
 }
 
+var max_hash_print_limit = 100;
+
+var cut_off = function (s) {
+    if (s.length <= max_hash_print_limit) {
+        return s;
+    } else {
+        return s.slice(0, max_hash_print_limit) + '...';
+    }
+}
+
 var Hash = function () {
     this.parent = null;
     this.hash = new Map();
@@ -541,7 +551,7 @@ var Hash = function () {
 
 Hash.prototype.basic_type_warn = function (x) {
     if (!x.basic_type()) {
-        throw 'Only basic types can be used as keys, not ' + x.to_s() + '.';
+        throw 'Only basic types can be used as keys, not ' + cut_off(x.to_s()) + '.';
     }
 }
 
@@ -549,7 +559,7 @@ Hash.prototype.get = function (x) {
     this.basic_type_warn(x);
     if (x instanceof ParentType) {
         if (this.parent === null) {
-            throw 'Cannot get parent in ' + this.to_s()
+            throw 'Cannot get parent in ' + cut_off(this.to_s())
             + ' since it does not exist.';
         }
         return this.parent;
@@ -560,7 +570,7 @@ Hash.prototype.get = function (x) {
         if (h.hash.has(s)) {
             return h.hash.get(s);
         } else if (h.parent === null) {
-            throw 'Cannot get ' + s + ' in ' + this.to_s()
+            throw 'Cannot get ' + s + ' in ' + cut_off(this.to_s())
             + ' since it does not exist.';
         } else {
             h = h.parent;
@@ -591,8 +601,8 @@ Hash.prototype['safe-get'] = function (x) {
 
 Hash.prototype.extend = function (x) {
     if (!(x instanceof Hash)) {
-        throw 'Cannot extend ' + this.to_s() +
-        ' by ' + x.to_s() + ' since it is not a hash.';
+        throw 'Cannot extend ' + cut_off(this.to_s()) +
+        ' by ' + cut_off(x.to_s()) + ' since it is not a hash.';
     }
     var keys = x.keys().list;
     var keys_l = keys.length;
@@ -606,19 +616,19 @@ Hash.prototype.def = function (x, y) {
     this.basic_type_warn(x);
     if (x instanceof ParentType) {
         if (this.parent !== null) {
-            throw 'Cannot define parent in ' + this.to_s() +
-            'since it already exists; it is ' + this.parent.to_s() + '.';
+            throw 'Cannot define parent in ' + cut_off(this.to_s()) +
+            'since it already exists; it is ' + cut_off(this.parent.to_s()) + '.';
         } else if (!(y instanceof Hash)) {
-            throw 'Cannot define parent in ' + this.to_s() +
-            ' to be anything other than a hash, like ' + y.to_s() + '.';
+            throw 'Cannot define parent in ' + cut_off(this.to_s()) +
+            ' to be anything other than a hash, like ' + cut_off(y.to_s()) + '.';
         } else {
             this.parent = y;
         }
     } else {
         var s = x.to_s_text();
         if (this.hash.has(s)) {
-            throw 'Cannot define ' + s + ' in ' + this.to_s() +
-            ' since it already exists; it is ' + this.hash.get(s).to_s() + '.';
+            throw 'Cannot define ' + s + ' in ' + cut_off(this.to_s()) +
+            ' since it already exists; it is ' + cut_off(this.hash.get(s).to_s()) + '.';
         } else {
             this.hash.set(s, y);
         }
@@ -630,7 +640,7 @@ Hash.prototype.del = function (x) {
     this.basic_type_warn(x);
     if (x instanceof ParentType) {
         if (this.parent === null) {
-            throw 'Cannot delete parent in ' + this.to_s() +
+            throw 'Cannot delete parent in ' + cut_off(this.to_s()) +
             ' since it does not exist.';
         }
         this.parent === null;
@@ -642,7 +652,7 @@ Hash.prototype.del = function (x) {
                 h.hash.delete(s);
                 break;
             } else if (h.parent === null) {
-                throw 'Cannot delete ' + s + ' in ' + this.to_s() +
+                throw 'Cannot delete ' + s + ' in ' + cut_off(this.to_s()) +
                 ' since it does not exist.';
             } else {
                 h = h.parent;
@@ -664,7 +674,8 @@ Hash.prototype.eval = function (x) {
     }
     var f = this.eval(x.car());
     if (typeof f.get_type !== 'function') {
-        throw 'Serious implementation error: cannot get the type of ' + f.to_s() + '!';
+        throw 'Serious implementation error: cannot get the type of ' +
+        cut_off(f.to_s()) + '!';
     }
     var g = f.get_type();
     var c = x.cdr();
@@ -681,9 +692,9 @@ Hash.prototype.eval = function (x) {
     } else if (g.is_type(types.syntax_type)) {
         return f.syntax_call(c, this);
     } else {
-        throw 'Illegal function-like value: ' + f.to_s() +
-        ', which is the result of evaluating ' + x.car().to_s() +
-        ', the head of ' + x.to_s() + '.';
+        throw 'Illegal function-like value: ' + cut_off(f.to_s()) +
+        ', which is the result of evaluating ' + cut_off(x.car().to_s()) +
+        ', the head of ' + cut_off(x.to_s()) + '.';
     }
 }
 
@@ -691,11 +702,11 @@ Hash.prototype.set = function (x, y) {
     this.basic_type_warn(x);
     if (x instanceof ParentType) {
         if (this.parent === null) {
-            throw 'Cannot set parent in ' + this.to_s()
+            throw 'Cannot set parent in ' + cut_off(this.to_s())
             + ' since it does not exist.';
         } else if (!(y instanceof Hash)) {
-            throw 'Cannot set parent in ' + this.to_s() +
-            ' to be anything other than a hash, like ' + y.to_s() + '.';
+            throw 'Cannot set parent in ' + cut_off(this.to_s()) +
+            ' to be anything other than a hash, like ' + cut_off(y.to_s()) + '.';
         } else {
             this.parent = y;
         }
@@ -707,7 +718,7 @@ Hash.prototype.set = function (x, y) {
                 h.hash.set(s, y);
                 break;
             } else if (h.parent === null) {
-                throw 'Cannot set ' + s + ' in ' + this.to_s()
+                throw 'Cannot set ' + s + ' in ' + cut_off(this.to_s())
                 + ' since it does not exist.';
             } else {
                 h = h.parent;
@@ -746,7 +757,8 @@ Hash.prototype['has-own?'] = function (x) {
 
 Hash.prototype['bind-all'] = function (x, y) {
     if (typeof x.get_type !== 'function') {
-        throw 'Serious implementation error: cannot get the type of ' + x.to_s() + '!';
+        throw 'Serious implementation error: cannot get the type of ' +
+        cut_off(x.to_s()) + '!';
     }
     if (x instanceof IntSymbol) {
         var x_n = x.name;
@@ -759,7 +771,7 @@ Hash.prototype['bind-all'] = function (x, y) {
     }
     if (!(x instanceof List)) {
         throw 'The left side of a recursive defintion must be a symbol or list, not ' +
-        x.to_s() + '!';
+        cut_off(x.to_s()) + '!';
     }
 
     var l = x.len();
@@ -777,6 +789,8 @@ Hash.prototype['bind-all'] = function (x, y) {
         + 'if the right side is!';
     }
 
+    // Binding definition.
+    // No overly long hashes in error messages here.
     var y_l = y.len();
     var x_i;
     var rest_loc = -1;
