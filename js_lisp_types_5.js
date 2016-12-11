@@ -15,7 +15,7 @@ var regexify = function (x) {
 var string_in_form = function (string) {
     string = string.replace(/\\/g, '\\\\');
     for (var i in escapes) {
-        if ('\\"\ns'.indexOf(i) === -1) {
+        if ('\\"\ns/'.indexOf(i) === -1) {
             string = string.replace(
                 new RegExp(regexify(escapes[i]), 'g'), '\\' + i);
         }
