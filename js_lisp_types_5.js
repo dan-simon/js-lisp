@@ -1,5 +1,7 @@
 'use strict';
 
+var max_fn_args = 10;
+
 var check_one_arg = function (args, name) {
     if (args.len() !== 1) {
         throw 'There should be only one argument to ' + name + '. ('
@@ -459,8 +461,26 @@ List.prototype.all = function (f, scope) {
 }
 
 List.prototype.concat = function () {
-    return new List([].concat.apply(
-        [], this.list.map(function (x) {return x.list})));
+    var partial = this.list.map(function (x) {
+        if (x instanceof List) {
+            return x.list;
+        } else {
+            return [x];
+        }
+    });
+    var result;
+    if (partial.length <= max_fn_args) {
+        result = [].concat.apply([], partial);
+    } else {
+        result = [];
+        for (var i = 0; i < partial.length; i++) {
+            var item = partial[i];
+            for (var j = 0; j < item.length; j++) {
+                result.push(item[j]);
+            }
+        }
+    }
+    return new List(result);
 }
 
 List.prototype.at = function (index) {
@@ -1014,5 +1034,6 @@ module.exports = {
     'js_to_bool': js_to_bool,
     'negate': negate,
     'negate_js': negate_js,
-    'check_one_arg': check_one_arg
+    'check_one_arg': check_one_arg,
+    'max_fn_args': max_fn_args
 }
